@@ -572,20 +572,17 @@
   // Sign in anonymously (invisible to user) so Firestore security rules are satisfied,
   // then attach a real-time listener that keeps all devices in sync.
   auth.signInAnonymously().then(() => {
-    // Create the document if it doesn't exist yet; merge:true won't overwrite existing data
-    docRef.set({ waterLog: [], bathroomLog: [], incidentTs: null }, { merge: true }).then(() => {
-      docRef.onSnapshot(snap => {
-        if (!snap.exists) return;
-        const data = snap.data();
-        waterLog    = data.waterLog    || [];
-        bathroomLog = data.bathroomLog || [];
-        incidentTs  = data.incidentTs  || null;
-        // Mirror to localStorage as offline cache
-        save('waterLog',    waterLog);
-        save('bathroomLog', bathroomLog);
-        save('incidentTs',  incidentTs);
-        tick(); // re-render all cards with latest data from any device
-      });
+    docRef.onSnapshot(snap => {
+      if (!snap.exists) return;
+      const data = snap.data();
+      waterLog    = data.waterLog    || [];
+      bathroomLog = data.bathroomLog || [];
+      incidentTs  = data.incidentTs  || null;
+      // Mirror to localStorage as offline cache
+      save('waterLog',    waterLog);
+      save('bathroomLog', bathroomLog);
+      save('incidentTs',  incidentTs);
+      tick(); // re-render all cards with latest data from any device
     });
   });
 </script>
