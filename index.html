@@ -330,7 +330,7 @@
     </div>
 
     <button class="btn btn-piss" onclick="recordBathroom('piss')">
-      💛 Pee Pee Time
+      📛 Pee Pee Time
     </button>
     <button class="btn btn-poop" onclick="recordBathroom('poop')">
       💩 Poo Poo Time
@@ -379,10 +379,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-  // ─── Firebase init ────────────────────────────────────────────────
-  // TODO: Replace the placeholder values below with your project's firebaseConfig
-  // from the Firebase console (Project Settings > General > Your apps > Web app)
-
+  // ─── Firebase init ─────────────────────────────────────────────────
   firebase.initializeApp({
     apiKey: "AIzaSyAjf5_FXec1K3e56QgBeENn4P3jblJX2Ys",
     authDomain: "dog-tracker-294ea.firebaseapp.com",
@@ -398,12 +395,19 @@
   const load = key => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
   const save = (key, val) => localStorage.setItem(key, JSON.stringify(val));
 
-  // ─── Session ID — URL hash is the shareable "room code" ───────────
+  // ─── Session ID — ?session=uuid query param is the shareable room code ───
+  // Using a query parameter instead of a hash fragment because hash fragments
+  // are frequently stripped by iMessage, SMS, and other messaging apps before
+  // the link is opened, causing a fresh UUID to be generated on the second device.
   function getSessionId() {
-    let id = location.hash.slice(1);
+    const params = new URLSearchParams(location.search);
+    let id = params.get('session');
     if (!id || id.length < 10) id = load('sessionId');
     if (!id || id.length < 10) { id = crypto.randomUUID(); save('sessionId', id); }
-    location.hash = '#' + id;
+    if (params.get('session') !== id) {
+      params.set('session', id);
+      history.replaceState(null, '', '?' + params.toString());
+    }
     return id;
   }
   const SESSION_ID = getSessionId();
@@ -415,7 +419,7 @@
   let incidentTs  = load('incidentTs')  || null; // ISO string or null
   let diaperOn    = false;
 
-  // ─── Utilities ─────────────────────────────────────────────────────
+  // ─── Utilities ────────────────────────────────────────────────────
   function fmtTime(iso) {
     const d = new Date(iso);
     return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) +
@@ -449,7 +453,7 @@
     setTimeout(() => el.classList.remove('show'), 2200);
   }
 
-  // ─── Water ─────────────────────────────────────────────────────────
+  // ─── Water ──────────────────────────────────────────────────────────────
   function giveWater() {
     docRef.set({ waterLog: firebase.firestore.FieldValue.arrayUnion(new Date().toISOString()) }, { merge: true });
     toast('💧 Water recorded!');
@@ -477,7 +481,7 @@
     ).join('');
   }
 
-  // ─── Diaper ────────────────────────────────────────────────────────
+  // ─── Diaper ───────────────────────────────────────────────────────────
   function toggleDiaper() {
     diaperOn = !diaperOn;
     const row   = document.getElementById('diaper-toggle');
@@ -486,7 +490,7 @@
     check.textContent = diaperOn ? '✓' : '';
   }
 
-  // ─── Bathroom ──────────────────────────────────────────────────────
+  // ─── Bathroom ──────────────────────────────────────────────────────────
   function recordBathroom(type) {
     const entry = { time: new Date().toISOString(), type, diaper: diaperOn };
     docRef.set({ bathroomLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
@@ -494,7 +498,7 @@
     diaperOn = false;
     document.getElementById('diaper-toggle').classList.remove('active');
     document.getElementById('diaper-check').textContent = '';
-    const labels = { piss:'💛 Pee Pee Time', poop:'💩 Poo Poo Time', both:'✨ All Poo Poo Time is Pee Pee Time' };
+    const labels = { piss:'📛 Pee Pee Time', poop:'💩 Poo Poo Time', both:'✨ All Poo Poo Time is Pee Pee Time' };
     toast(`${labels[type]} recorded!`);
     // onSnapshot fires on this device too and will re-render
   }
@@ -510,7 +514,7 @@
     const recent = bathroomLog.slice(-5).reverse();
     ul.innerHTML = recent.map(entry => {
       const diaperBadge = entry.diaper
-        ? `<span class="badge badge-diaper">🩲</span>`
+        ? `<span class="badge badge-diaper">🨲</span>`
         : '';
       return `<li>
         <span class="recent-time">${fmtTime(entry.time)}</span>
@@ -523,7 +527,7 @@
     }).join('');
   }
 
-  // ─── Incident ──────────────────────────────────────────────────────
+  // ─── Incident ──────────────────────────────────────────────────────────
   function recordIncident() {
     docRef.set({ incidentTs: new Date().toISOString() }, { merge: true });
     toast('⚠️ Accident recorded');
@@ -551,21 +555,21 @@
     }
   }
 
-  // ─── Sharing ───────────────────────────────────────────────────────
+  // ─── Sharing ───────────────────────────────────────────────────────────
   function copyLink() {
     navigator.clipboard.writeText(location.href)
       .then(() => toast('🔗 Link copied! Send to family member.'))
       .catch(() => toast('Copy this URL: ' + location.href));
   }
 
-  // ─── Live clock for elapsed times ──────────────────────────────────
+  // ─── Live clock for elapsed times ──────────────────────────────────────────────
   function tick() {
     renderWater();
     renderBathroom();
     renderIncident();
   }
 
-  // ─── Init ──────────────────────────────────────────────────────────
+  // ─── Init ─────────────────────────────────────────────────────────────────
   tick();                      // render from localStorage immediately (fast first paint)
   setInterval(tick, 30000);    // keep ticking for elapsed-time display ("14m ago" etc.)
 
