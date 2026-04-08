@@ -451,7 +451,7 @@
 
   // ─── Water ─────────────────────────────────────────────────────────
   function giveWater() {
-    docRef.update({ waterLog: firebase.firestore.FieldValue.arrayUnion(new Date().toISOString()) });
+    docRef.set({ waterLog: firebase.firestore.FieldValue.arrayUnion(new Date().toISOString()) }, { merge: true });
     toast('💧 Water recorded!');
     // onSnapshot fires on this device too and will re-render
   }
@@ -489,7 +489,7 @@
   // ─── Bathroom ──────────────────────────────────────────────────────
   function recordBathroom(type) {
     const entry = { time: new Date().toISOString(), type, diaper: diaperOn };
-    docRef.update({ bathroomLog: firebase.firestore.FieldValue.arrayUnion(entry) });
+    docRef.set({ bathroomLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
     // auto-reset diaper after recording
     diaperOn = false;
     document.getElementById('diaper-toggle').classList.remove('active');
