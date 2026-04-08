@@ -282,6 +282,12 @@
 
 <h1>🐾 Dog Tracker <span>&#9829;</span></h1>
 
+<div style="text-align:center; margin-bottom:16px;">
+  <button onclick="copyLink()" style="background:none;border:1px solid #cbd5e0;border-radius:8px;padding:6px 14px;font-size:0.8rem;color:#4a5568;cursor:pointer;">
+    🔗 Copy Sharing Link
+  </button>
+</div>
+
 <div class="grid">
 
   <!-- WATER CARD -->
@@ -369,12 +375,41 @@
 
 <div id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-  // ─── Storage helpers ───────────────────────────────────────────────
+  // ─── Firebase init ────────────────────────────────────────────────
+  // TODO: Replace the placeholder values below with your project's firebaseConfig
+  // from the Firebase console (Project Settings > General > Your apps > Web app)
+
+  firebase.initializeApp({
+  apiKey: "AIzaSyAexrPYHE-CHf6axChAdxojzdN6mZxPuZ4",
+  authDomain: "kenobi-tracker-33105.firebaseapp.com",
+  projectId: "kenobi-tracker-33105",
+  storageBucket: "kenobi-tracker-33105.firebasestorage.app",
+  messagingSenderId: "1099383889323",
+  appId: "1:1099383889323:web:5fdfab701c5d53af1f46ee"
+  });
+  const db   = firebase.firestore();
+  const auth = firebase.auth();
+
+  // ─── Storage helpers (kept for fast first-paint / offline cache) ───
   const load = key => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
   const save = (key, val) => localStorage.setItem(key, JSON.stringify(val));
 
-  // ─── State ─────────────────────────────────────────────────────────
+  // ─── Session ID — URL hash is the shareable "room code" ───────────
+  function getSessionId() {
+    let id = location.hash.slice(1);
+    if (!id || id.length < 10) id = load('sessionId');
+    if (!id || id.length < 10) { id = crypto.randomUUID(); save('sessionId', id); }
+    location.hash = '#' + id;
+    return id;
+  }
+  const SESSION_ID = getSessionId();
+  const docRef = db.collection('trackers').doc(SESSION_ID);
+
+  // ─── State (seeded from localStorage for instant first paint) ─────
   let waterLog    = load('waterLog')    || [];   // array of ISO strings
   let bathroomLog = load('bathroomLog') || [];   // [{time, type, diaper}]
   let incidentTs  = load('incidentTs')  || null; // ISO string or null
@@ -416,10 +451,9 @@
 
   // ─── Water ─────────────────────────────────────────────────────────
   function giveWater() {
-    waterLog.push(new Date().toISOString());
-    save('waterLog', waterLog);
-    renderWater();
+    docRef.update({ waterLog: firebase.firestore.FieldValue.arrayUnion(new Date().toISOString()) });
     toast('💧 Water recorded!');
+    // onSnapshot fires on this device too and will re-render
   }
 
   function renderWater() {
@@ -455,15 +489,14 @@
   // ─── Bathroom ──────────────────────────────────────────────────────
   function recordBathroom(type) {
     const entry = { time: new Date().toISOString(), type, diaper: diaperOn };
-    bathroomLog.push(entry);
-    save('bathroomLog', bathroomLog);
+    docRef.update({ bathroomLog: firebase.firestore.FieldValue.arrayUnion(entry) });
     // auto-reset diaper after recording
     diaperOn = false;
     document.getElementById('diaper-toggle').classList.remove('active');
     document.getElementById('diaper-check').textContent = '';
-    renderBathroom();
     const labels = { piss:'💛 Pee Pee Time', poop:'💩 Poo Poo Time', both:'✨ All Poo Poo Time is Pee Pee Time' };
     toast(`${labels[type]} recorded!`);
+    // onSnapshot fires on this device too and will re-render
   }
 
   function renderBathroom() {
@@ -492,18 +525,16 @@
 
   // ─── Incident ──────────────────────────────────────────────────────
   function recordIncident() {
-    incidentTs = new Date().toISOString();
-    save('incidentTs', incidentTs);
-    renderIncident();
+    docRef.set({ incidentTs: new Date().toISOString() }, { merge: true });
     toast('⚠️ Accident recorded');
+    // onSnapshot fires on this device too and will re-render
   }
 
   function resetIncident() {
     if (!confirm('Reset the incident counter? This will clear the last accident date.')) return;
-    incidentTs = null;
-    save('incidentTs', incidentTs);
-    renderIncident();
+    docRef.set({ incidentTs: null }, { merge: true });
     toast('🔄 Counter reset');
+    // onSnapshot fires on this device too and will re-render
   }
 
   function renderIncident() {
@@ -520,6 +551,13 @@
     }
   }
 
+  // ─── Sharing ───────────────────────────────────────────────────────
+  function copyLink() {
+    navigator.clipboard.writeText(location.href)
+      .then(() => toast('🔗 Link copied! Send to family member.'))
+      .catch(() => toast('Copy this URL: ' + location.href));
+  }
+
   // ─── Live clock for elapsed times ──────────────────────────────────
   function tick() {
     renderWater();
@@ -528,8 +566,28 @@
   }
 
   // ─── Init ──────────────────────────────────────────────────────────
-  tick();
-  setInterval(tick, 30000); // refresh every 30 seconds
+  tick();                      // render from localStorage immediately (fast first paint)
+  setInterval(tick, 30000);    // keep ticking for elapsed-time display ("14m ago" etc.)
+
+  // Sign in anonymously (invisible to user) so Firestore security rules are satisfied,
+  // then attach a real-time listener that keeps all devices in sync.
+  auth.signInAnonymously().then(() => {
+    // Create the document if it doesn't exist yet; merge:true won't overwrite existing data
+    docRef.set({ waterLog: [], bathroomLog: [], incidentTs: null }, { merge: true }).then(() => {
+      docRef.onSnapshot(snap => {
+        if (!snap.exists) return;
+        const data = snap.data();
+        waterLog    = data.waterLog    || [];
+        bathroomLog = data.bathroomLog || [];
+        incidentTs  = data.incidentTs  || null;
+        // Mirror to localStorage as offline cache
+        save('waterLog',    waterLog);
+        save('bathroomLog', bathroomLog);
+        save('incidentTs',  incidentTs);
+        tick(); // re-render all cards with latest data from any device
+      });
+    });
+  });
 </script>
 </body>
 </html>
