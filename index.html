@@ -108,12 +108,6 @@
       box-shadow: 0 3px 8px rgba(229,62,62,0.4);
     }
 
-    .btn-reset {
-      background: #718096;
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(113,128,150,0.3);
-    }
-
     /* DIAPER TOGGLE */
     .diaper-row {
       display: flex;
@@ -307,9 +301,9 @@
     </div>
 
     <div class="stat-block" style="margin-bottom:10px;">
-      <div class="stat-label">Recent (up to 5)</div>
+      <div class="stat-label">Today's Waterings</div>
       <ul class="recent-list" id="water-list">
-        <li><span class="stat-value none">No waterings recorded yet</span></li>
+        <li><span class="stat-value none">No waterings recorded today</span></li>
       </ul>
     </div>
 
@@ -323,9 +317,9 @@
     <div class="card-title"><span class="icon">🚶</span> Bathroom</div>
 
     <div class="stat-block" style="margin-bottom:10px;">
-      <div class="stat-label">Recent Outings (up to 5)</div>
+      <div class="stat-label">Today's Outings</div>
       <ul class="recent-list" id="bathroom-list">
-        <li><span class="stat-value none">None recorded yet</span></li>
+        <li><span class="stat-value none">No outings recorded today</span></li>
       </ul>
     </div>
 
@@ -364,9 +358,6 @@
         <button class="btn btn-incident" onclick="recordIncident()">
           ⚠️ Record Accident Now
         </button>
-        <button class="btn btn-reset" onclick="resetIncident()">
-          🔄 Reset Incident Counter
-        </button>
       </div>
     </div>
   </div>
@@ -379,7 +370,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-  // ─── Firebase init ─────────────────────────────────────────────────
+  // ─── Firebase init ─────────────────────────────────────────────
   firebase.initializeApp({
     apiKey: "AIzaSyAjf5_FXec1K3e56QgBeENn4P3jblJX2Ys",
     authDomain: "dog-tracker-294ea.firebaseapp.com",
@@ -419,7 +410,7 @@
   let incidentTs  = load('incidentTs')  || null; // ISO string or null
   let diaperOn    = false;
 
-  // ─── Utilities ────────────────────────────────────────────────────
+  // ─── Utilities ──────────────────────────────────────────────────
   function fmtTime(iso) {
     const d = new Date(iso);
     return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) +
@@ -453,7 +444,7 @@
     setTimeout(() => el.classList.remove('show'), 2200);
   }
 
-  // ─── Water ──────────────────────────────────────────────────────────────
+  // ─── Water ─────────────────────────────────────────────────────────────
   function giveWater() {
     docRef.set({ waterLog: firebase.firestore.FieldValue.arrayUnion(new Date().toISOString()) }, { merge: true });
     toast('💧 Water recorded!');
@@ -461,19 +452,20 @@
   }
 
   function renderWater() {
-    const count = todayCount(waterLog);
-    document.getElementById('water-count').textContent = count;
+    const today = new Date().toDateString();
+    const todayEntries = waterLog.filter(ts => new Date(ts).toDateString() === today).reverse();
 
-    const last = waterLog.length ? waterLog[waterLog.length - 1] : null;
-    document.getElementById('water-elapsed').textContent = elapsedStr(last);
+    document.getElementById('water-count').textContent = todayEntries.length;
 
-    const recent = waterLog.slice(-5).reverse();
+    const lastAll = waterLog.length ? waterLog[waterLog.length - 1] : null;
+    document.getElementById('water-elapsed').textContent = elapsedStr(lastAll);
+
     const ul = document.getElementById('water-list');
-    if (recent.length === 0) {
-      ul.innerHTML = '<li><span class="stat-value none">No waterings recorded yet</span></li>';
+    if (todayEntries.length === 0) {
+      ul.innerHTML = '<li><span class="stat-value none">No waterings recorded today</span></li>';
       return;
     }
-    ul.innerHTML = recent.map((ts, i) =>
+    ul.innerHTML = todayEntries.map(ts =>
       `<li>
         <span class="recent-time">${fmtTime(ts)}</span>
         <span class="recent-ago">${elapsedStr(ts)}</span>
@@ -490,7 +482,7 @@
     check.textContent = diaperOn ? '✓' : '';
   }
 
-  // ─── Bathroom ──────────────────────────────────────────────────────────
+  // ─── Bathroom ─────────────────────────────────────────────────────────
   function recordBathroom(type) {
     const entry = { time: new Date().toISOString(), type, diaper: diaperOn };
     docRef.set({ bathroomLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
@@ -504,15 +496,17 @@
   }
 
   function renderBathroom() {
+    const today = new Date().toDateString();
+    const todayEntries = bathroomLog.filter(entry => new Date(entry.time).toDateString() === today).reverse();
+
     const ul = document.getElementById('bathroom-list');
-    if (bathroomLog.length === 0) {
-      ul.innerHTML = '<li><span class="stat-value none">None recorded yet</span></li>';
+    if (todayEntries.length === 0) {
+      ul.innerHTML = '<li><span class="stat-value none">No outings recorded today</span></li>';
       return;
     }
     const typeLabels = { piss: 'Pee Pee', poop: 'Poo Poo', both: 'Both' };
     const typeClass  = { piss: 'badge-piss', poop: 'badge-poop', both: 'badge-both' };
-    const recent = bathroomLog.slice(-5).reverse();
-    ul.innerHTML = recent.map(entry => {
+    ul.innerHTML = todayEntries.map(entry => {
       const diaperBadge = entry.diaper
         ? `<span class="badge badge-diaper">🨲</span>`
         : '';
@@ -527,17 +521,10 @@
     }).join('');
   }
 
-  // ─── Incident ──────────────────────────────────────────────────────────
+  // ─── Incident ─────────────────────────────────────────────────────────
   function recordIncident() {
     docRef.set({ incidentTs: new Date().toISOString() }, { merge: true });
     toast('⚠️ Accident recorded');
-    // onSnapshot fires on this device too and will re-render
-  }
-
-  function resetIncident() {
-    if (!confirm('Reset the incident counter? This will clear the last accident date.')) return;
-    docRef.set({ incidentTs: null }, { merge: true });
-    toast('🔄 Counter reset');
     // onSnapshot fires on this device too and will re-render
   }
 
@@ -555,21 +542,21 @@
     }
   }
 
-  // ─── Sharing ───────────────────────────────────────────────────────────
+  // ─── Sharing ─────────────────────────────────────────────────────────
   function copyLink() {
     navigator.clipboard.writeText(location.href)
       .then(() => toast('🔗 Link copied! Send to family member.'))
       .catch(() => toast('Copy this URL: ' + location.href));
   }
 
-  // ─── Live clock for elapsed times ──────────────────────────────────────────────
+  // ─── Live clock for elapsed times ─────────────────────────────────────────────
   function tick() {
     renderWater();
     renderBathroom();
     renderIncident();
   }
 
-  // ─── Init ─────────────────────────────────────────────────────────────────
+  // ─── Init ─────────────────────────────────────────────────────────────
   tick();                      // render from localStorage immediately (fast first paint)
   setInterval(tick, 30000);    // keep ticking for elapsed-time display ("14m ago" etc.)
 
