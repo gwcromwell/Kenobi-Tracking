@@ -401,21 +401,14 @@
   <!-- INCIDENT CARD -->
   <div class="card">
     <div class="card-title"><span class="icon">⚠️</span> Accident / Incident</div>
-
-    <div style="display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap;">
-      <div style="flex:1; min-width:180px;">
-        <div class="incident-big">
-          <div class="incident-days" id="incident-days">—</div>
-          <div class="incident-days-label">days since last accident</div>
-        </div>
-        <div class="incident-date" id="incident-date">No accidents recorded</div>
-      </div>
-      <div style="flex:1; min-width:180px;">
-        <button class="btn btn-incident" onclick="recordIncident()">
-          ⚠️ Record Accident Now
-        </button>
-      </div>
+    <div class="incident-big">
+      <div class="incident-days" id="incident-days">—</div>
+      <div class="incident-days-label">days since last accident</div>
     </div>
+    <div class="incident-date" id="incident-date">No accidents recorded</div>
+    <button class="btn btn-incident" onclick="recordIncident()">
+      ⚠️ Record Accident Now
+    </button>
   </div>
 
 </div>
@@ -491,8 +484,11 @@
 
   function daysBetween(iso) {
     if (!iso) return null;
-    const diff = Date.now() - new Date(iso).getTime();
-    return Math.floor(diff / 86400000);
+    const d = new Date(iso);
+    const incidentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.round((today - incidentDay) / 86400000);
   }
 
   function toast(msg) {
