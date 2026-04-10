@@ -364,26 +364,6 @@
     </div>
   </div>
 
-  <!-- INCIDENT CARD -->
-  <div class="card full-width">
-    <div class="card-title"><span class="icon">⚠️</span> Accident / Incident</div>
-
-    <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
-      <div style="flex:1; min-width:180px;">
-        <div class="incident-big">
-          <div class="incident-days" id="incident-days">—</div>
-          <div class="incident-days-label">days since last accident</div>
-        </div>
-        <div class="incident-date" id="incident-date">No accidents recorded</div>
-      </div>
-      <div style="flex:1; min-width:180px;">
-        <button class="btn btn-incident" onclick="recordIncident()">
-          ⚠️ Record Accident Now
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- FOOD CARD -->
   <div class="card full-width">
     <div class="card-title"><span class="icon">🍽️</span> Feeding</div>
@@ -413,6 +393,26 @@
         </button>
         <button class="btn btn-dinner" onclick="recordFood('dinner')">
           🌙 Dinner
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INCIDENT CARD -->
+  <div class="card full-width">
+    <div class="card-title"><span class="icon">⚠️</span> Accident / Incident</div>
+
+    <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+      <div style="flex:1; min-width:180px;">
+        <div class="incident-big">
+          <div class="incident-days" id="incident-days">—</div>
+          <div class="incident-days-label">days since last accident</div>
+        </div>
+        <div class="incident-date" id="incident-date">No accidents recorded</div>
+      </div>
+      <div style="flex:1; min-width:180px;">
+        <button class="btn btn-incident" onclick="recordIncident()">
+          ⚠️ Record Accident Now
         </button>
       </div>
     </div>
