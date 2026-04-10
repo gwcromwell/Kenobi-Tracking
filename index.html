@@ -377,29 +377,31 @@
   </div>
 
   <!-- FOOD CARD -->
-  <div class="card">
+  <div class="card full-width">
     <div class="card-title"><span class="icon">🍽️</span> Feeding</div>
 
-    <div style="display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap;">
-      <div style="flex:1; min-width:200px;">
-        <div class="stat-block">
+    <div style="display:flex; gap:10px; align-items:stretch;">
+      <div style="flex:1;">
+        <div class="stat-block" style="margin-bottom:0; height:100%;">
           <div class="stat-label">Today's Feedings</div>
           <ul class="recent-list" id="food-list">
             <li><span class="stat-value none">No feedings recorded today</span></li>
           </ul>
         </div>
       </div>
-      <div style="flex:1; min-width:200px;">
-        <button class="btn btn-breakfast" onclick="recordFood('breakfast')">
-          🌅 Breakfast
-        </button>
-        <button class="btn btn-lunch" onclick="recordFood('lunch')">
-          ☀️ Lunch
-        </button>
-        <button class="btn btn-dinner" onclick="recordFood('dinner')">
-          🌙 Dinner
-        </button>
-        <div class="diaper-row" id="pumpkin-toggle" onclick="togglePumpkin()">
+      <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+        <div style="display:flex; gap:5px;">
+          <button class="btn btn-breakfast" onclick="recordFood('breakfast')" style="margin-bottom:0;">
+            🌅 Breakfast
+          </button>
+          <button class="btn btn-lunch" onclick="recordFood('lunch')" style="margin-bottom:0;">
+            ☀️ Lunch
+          </button>
+          <button class="btn btn-dinner" onclick="recordFood('dinner')" style="margin-bottom:0;">
+            🌙 Dinner
+          </button>
+        </div>
+        <div class="diaper-row" id="pumpkin-toggle" onclick="togglePumpkin()" style="margin-bottom:0;">
           <div class="diaper-check" id="pumpkin-check"></div>
           <div>
             <div class="diaper-label">Add Pumpkin</div>
@@ -411,16 +413,23 @@
   </div>
 
   <!-- INCIDENT CARD -->
-  <div class="card">
+  <div class="card full-width">
     <div class="card-title"><span class="icon">⚠️</span> Accident / Incident</div>
-    <div class="incident-big">
-      <div class="incident-days" id="incident-days">—</div>
-      <div class="incident-days-label">days since last accident</div>
+
+    <div style="display:flex; gap:10px; align-items:center;">
+      <div style="flex:1;">
+        <div class="incident-big" style="margin-bottom:4px;">
+          <div class="incident-days" id="incident-days">—</div>
+          <div class="incident-days-label">days since last accident</div>
+        </div>
+        <div class="incident-date" id="incident-date" style="margin-bottom:0;">No accidents recorded</div>
+      </div>
+      <div style="flex:1;">
+        <button class="btn btn-incident" onclick="recordIncident()" style="margin-bottom:0;">
+          ⚠️ Record Accident Now
+        </button>
+      </div>
     </div>
-    <div class="incident-date" id="incident-date">No accidents recorded</div>
-    <button class="btn btn-incident" onclick="recordIncident()">
-      ⚠️ Record Accident Now
-    </button>
   </div>
 
 </div>
