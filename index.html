@@ -338,6 +338,18 @@
   <div class="card">
     <div class="card-title"><span class="icon">🚶</span> Bathroom</div>
 
+    <div style="display:flex; gap:6px; margin-bottom:6px;">
+      <div class="stat-block" style="flex:1; text-align:center;">
+        <div class="stat-label">Walks Today</div>
+        <div class="stat-value big" id="walk-count">0</div>
+        <div style="font-size:0.75rem;color:#a0aec0;">walks</div>
+      </div>
+      <div class="stat-block" style="flex:2;">
+        <div class="stat-label">Time Since Last Walk</div>
+        <div class="stat-value elapsed" id="walk-elapsed">—</div>
+      </div>
+    </div>
+
     <div class="stat-block" style="margin-bottom:6px;">
       <div class="stat-label">Today's Outings</div>
       <ul class="recent-list" id="bathroom-list">
@@ -552,6 +564,10 @@
   function renderBathroom() {
     const today = new Date().toDateString();
     const todayEntries = bathroomLog.filter(entry => new Date(entry.time).toDateString() === today).reverse();
+
+    document.getElementById('walk-count').textContent = todayEntries.length;
+    const lastWalk = bathroomLog.length ? bathroomLog[bathroomLog.length - 1].time : null;
+    document.getElementById('walk-elapsed').textContent = elapsedStr(lastWalk);
 
     const ul = document.getElementById('bathroom-list');
     if (todayEntries.length === 0) {
