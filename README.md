@@ -11,6 +11,7 @@ A real-time dog habit tracker for tracking Kenobi's daily water intake, bathroom
 
 ### Bathroom
 - Record outings as pee, poop, or both
+- Displays today's walk count and time elapsed since the last walk (derived from bathroom outing timestamps)
 - Optional **Diaper Used** toggle — enable it before recording an outing to tag the entry; resets automatically after each record
 - Shows a timestamped list of today's outings with color-coded badges
 
@@ -18,11 +19,25 @@ A real-time dog habit tracker for tracking Kenobi's daily water intake, bathroom
 - Record breakfast, lunch, and dinner
 - Optional **Add Pumpkin** toggle — enable it before recording a meal to log wet food with pumpkin instead of plain wet food; resets automatically after each record
 - Shows today's feedings with meal and food-type badges
+- Only today's records are shown; prior days are never displayed
 
 ### Accident / Incident
 - Tracks the most recent accident with a large days-since counter
 - Day count is calendar-based: an accident recorded any time today shows **0**, yesterday shows **1**, and so on
-- Tapping "Record Accident Now" overwrites the previous timestamp
+- The last accident date and time are displayed inside the counter box
+- Tap the **Whoops** button to record a new accident
+
+## Layout
+
+The app uses a two-column card grid optimised to fit an iPad screen without scrolling:
+
+| Row | Left | Right |
+|-----|------|-------|
+| 1 | Water | Bathroom |
+| 2 | Feeding (full width) | |
+| 3 | Accident / Incident (full width) | |
+
+On phones (≤600px) all cards stack into a single column, and the Feeding card's list and buttons stack vertically for comfortable tap targets.
 
 ## Sharing
 
@@ -40,14 +55,11 @@ Sessions are identified by a UUID in the `?session=` query parameter. Opening th
 
 ```
 trackers/{sessionId}
-  waterLog:    string[]          // ISO timestamp per watering
-  bathroomLog: { time, type, diaper }[]
-  incidentTs:  string | null     // ISO timestamp of last accident
-  foodLog:     { time, meal, pumpkin }[]
+  waterLog:    string[]                      // ISO timestamp per watering
+  bathroomLog: { time, type, diaper }[]      // type: "piss" | "poop" | "both"
+  incidentTs:  string | null                 // ISO timestamp of last accident
+  foodLog:     { time, meal, pumpkin }[]     // meal: "breakfast" | "lunch" | "dinner"
 ```
-
-`meal` is `"breakfast"`, `"lunch"`, or `"dinner"`.  
-`type` is `"piss"`, `"poop"`, or `"both"`.
 
 ## Tech Stack
 
