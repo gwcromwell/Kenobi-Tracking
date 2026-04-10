@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <!-- Nautical star: 5 arms × 2 triangles each, left=black, right=red -->
+  <!-- Outer points at r=230, inner points at r=88, center at 250,250 -->
+
+  <!-- Left halves (black) -->
+  <polygon points="250,20 198.27,178.81 250,250"       fill="#000"/>
+  <polygon points="468.75,178.93 301.73,178.81 250,250" fill="#000"/>
+  <polygon points="385.19,436.07 333.70,277.19 250,250" fill="#000"/>
+  <polygon points="114.81,436.07 250,338 250,250"       fill="#000"/>
+  <polygon points="31.25,178.93 166.30,277.19 250,250"  fill="#000"/>
+
+  <!-- Right halves (red) -->
+  <polygon points="250,20 250,250 301.73,178.81"        fill="#cc0000"/>
+  <polygon points="468.75,178.93 250,250 333.70,277.19" fill="#cc0000"/>
+  <polygon points="385.19,436.07 250,250 250,338"        fill="#cc0000"/>
+  <polygon points="114.81,436.07 250,250 166.30,277.19" fill="#cc0000"/>
+  <polygon points="31.25,178.93 250,250 198.27,178.81"  fill="#cc0000"/>
+</svg>
