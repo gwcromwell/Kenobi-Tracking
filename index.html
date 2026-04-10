@@ -676,8 +676,8 @@
     const mealClass  = { breakfast: 'badge-breakfast', lunch: 'badge-lunch', dinner: 'badge-dinner' };
     ul.innerHTML = todayEntries.map(entry => {
       const foodBadge = entry.pumpkin
-        ? `<span class="badge badge-pumpkin">🎃 +Pumpkin</span>`
-        : `<span class="badge" style="background:#f7fafc;color:#718096;">Wet Food</span>`;
+        ? `<span class="badge badge-pumpkin">🎃</span>`
+        //: `<span class="badge" style="background:#f7fafc;color:#718096;">Wet Food</span>`;
       return `<li>
         <span class="recent-time">${fmtTime(entry.time)}</span>
         <span style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
