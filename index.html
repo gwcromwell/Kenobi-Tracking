@@ -108,6 +108,24 @@
       box-shadow: 0 3px 8px rgba(229,62,62,0.4);
     }
 
+    .btn-breakfast {
+      background: #dd6b20;
+      color: #fff;
+      box-shadow: 0 3px 8px rgba(221,107,32,0.4);
+    }
+
+    .btn-lunch {
+      background: #38a169;
+      color: #fff;
+      box-shadow: 0 3px 8px rgba(56,161,105,0.4);
+    }
+
+    .btn-dinner {
+      background: #6b46c1;
+      color: #fff;
+      box-shadow: 0 3px 8px rgba(107,70,193,0.4);
+    }
+
     /* DIAPER TOGGLE */
     .diaper-row {
       display: flex;
@@ -213,6 +231,10 @@
     .badge-poop { background: #feebc8; color: #7b341e; }
     .badge-both { background: #e9d8fd; color: #553c9a; }
     .badge-diaper { background: #bee3f8; color: #2a4365; margin-left: 4px; }
+    .badge-breakfast { background: #feebc8; color: #7b341e; }
+    .badge-lunch { background: #c6f6d5; color: #22543d; }
+    .badge-dinner { background: #e9d8fd; color: #44337a; }
+    .badge-pumpkin { background: #fbd38d; color: #7b341e; }
 
     /* INCIDENT */
     .incident-big {
@@ -362,6 +384,40 @@
     </div>
   </div>
 
+  <!-- FOOD CARD -->
+  <div class="card full-width">
+    <div class="card-title"><span class="icon">🍽️</span> Feeding</div>
+
+    <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+      <div style="flex:1; min-width:200px;">
+        <div class="stat-block">
+          <div class="stat-label">Today's Feedings</div>
+          <ul class="recent-list" id="food-list">
+            <li><span class="stat-value none">No feedings recorded today</span></li>
+          </ul>
+        </div>
+      </div>
+      <div style="flex:1; min-width:200px;">
+        <div class="diaper-row" id="pumpkin-toggle" onclick="togglePumpkin()">
+          <div class="diaper-check" id="pumpkin-check"></div>
+          <div>
+            <div class="diaper-label">Add Pumpkin</div>
+            <div style="font-size:0.75rem;color:#718096;">Toggle for wet food + pumpkin</div>
+          </div>
+        </div>
+        <button class="btn btn-breakfast" onclick="recordFood('breakfast')">
+          🌅 Breakfast
+        </button>
+        <button class="btn btn-lunch" onclick="recordFood('lunch')">
+          ☀️ Lunch
+        </button>
+        <button class="btn btn-dinner" onclick="recordFood('dinner')">
+          🌙 Dinner
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <div id="toast"></div>
@@ -408,7 +464,9 @@
   let waterLog    = load('waterLog')    || [];   // array of ISO strings
   let bathroomLog = load('bathroomLog') || [];   // [{time, type, diaper}]
   let incidentTs  = load('incidentTs')  || null; // ISO string or null
+  let foodLog     = load('foodLog')     || [];   // [{time, meal, pumpkin}]
   let diaperOn    = false;
+  let pumpkinOn   = false;
 
   // ─── Utilities ──────────────────────────────────────────────────
   function fmtTime(iso) {
@@ -542,6 +600,53 @@
     }
   }
 
+  // ─── Food ─────────────────────────────────────────────────────────────
+  function togglePumpkin() {
+    pumpkinOn = !pumpkinOn;
+    const row   = document.getElementById('pumpkin-toggle');
+    const check = document.getElementById('pumpkin-check');
+    row.classList.toggle('active', pumpkinOn);
+    check.textContent = pumpkinOn ? '✓' : '';
+  }
+
+  function recordFood(meal) {
+    const entry = { time: new Date().toISOString(), meal, pumpkin: pumpkinOn };
+    docRef.set({ foodLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
+    // auto-reset pumpkin after recording
+    pumpkinOn = false;
+    document.getElementById('pumpkin-toggle').classList.remove('active');
+    document.getElementById('pumpkin-check').textContent = '';
+    const labels = { breakfast: '🌅 Breakfast', lunch: '☀️ Lunch', dinner: '🌙 Dinner' };
+    toast(`${labels[meal]} recorded!`);
+    // onSnapshot fires on this device too and will re-render
+  }
+
+  function renderFood() {
+    const today = new Date().toDateString();
+    const todayEntries = foodLog.filter(entry => new Date(entry.time).toDateString() === today).reverse();
+
+    const ul = document.getElementById('food-list');
+    if (todayEntries.length === 0) {
+      ul.innerHTML = '<li><span class="stat-value none">No feedings recorded today</span></li>';
+      return;
+    }
+    const mealLabels = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
+    const mealClass  = { breakfast: 'badge-breakfast', lunch: 'badge-lunch', dinner: 'badge-dinner' };
+    ul.innerHTML = todayEntries.map(entry => {
+      const foodBadge = entry.pumpkin
+        ? `<span class="badge badge-pumpkin">🎃 +Pumpkin</span>`
+        : `<span class="badge" style="background:#f7fafc;color:#718096;">Wet Food</span>`;
+      return `<li>
+        <span class="recent-time">${fmtTime(entry.time)}</span>
+        <span style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+          <span class="badge ${mealClass[entry.meal]}">${mealLabels[entry.meal]}</span>
+          ${foodBadge}
+          <span class="recent-ago">${elapsedStr(entry.time)}</span>
+        </span>
+      </li>`;
+    }).join('');
+  }
+
   // ─── Sharing ─────────────────────────────────────────────────────────
   function copyLink() {
     navigator.clipboard.writeText(location.href)
@@ -554,6 +659,7 @@
     renderWater();
     renderBathroom();
     renderIncident();
+    renderFood();
   }
 
   // ─── Init ─────────────────────────────────────────────────────────────
@@ -569,10 +675,12 @@
       waterLog    = data.waterLog    || [];
       bathroomLog = data.bathroomLog || [];
       incidentTs  = data.incidentTs  || null;
+      foodLog     = data.foodLog     || [];
       // Mirror to localStorage as offline cache
       save('waterLog',    waterLog);
       save('bathroomLog', bathroomLog);
       save('incidentTs',  incidentTs);
+      save('foodLog',     foodLog);
       tick(); // re-render all cards with latest data from any device
     });
   });
