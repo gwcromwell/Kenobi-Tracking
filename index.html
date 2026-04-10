@@ -108,6 +108,27 @@
       box-shadow: 0 3px 8px rgba(229,62,62,0.4);
     }
 
+    .btn-sq {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      padding: 10px;
+      width: 76px;
+      height: 76px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      line-height: 1.2;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .btn-sq:active { transform: scale(0.97); box-shadow: none !important; }
+    .btn-sq .sq-icon { font-size: 1.7rem; line-height: 1; }
+
     .btn-breakfast {
       background: #dd6b20;
       color: #fff;
@@ -424,9 +445,10 @@
         </div>
         <div class="incident-date" id="incident-date" style="margin-bottom:0;">No accidents recorded</div>
       </div>
-      <div style="flex:1;">
-        <button class="btn btn-incident" onclick="recordIncident()" style="margin-bottom:0;">
-          ⚠️ Record Accident Now
+      <div style="display:flex; align-items:center; justify-content:center;">
+        <button class="btn-sq btn-incident" onclick="recordIncident()">
+          <span class="sq-icon">⚠️</span>
+          <span>Whoops</span>
         </button>
       </div>
     </div>
