@@ -291,6 +291,8 @@
     @media (max-width: 600px) {
       .grid { grid-template-columns: 1fr; }
       .card.full-width { grid-column: auto; }
+      .food-cols { flex-direction: column; }
+      .food-cols > div { height: auto !important; }
     }
 
     /* TOAST */
@@ -401,8 +403,8 @@
   <div class="card full-width">
     <div class="card-title"><span class="icon">🍽️</span> Feeding</div>
 
-    <div style="display:flex; gap:10px; align-items:stretch;">
-      <div style="flex:1;">
+    <div class="food-cols" style="display:flex; gap:10px; align-items:stretch;">
+      <div style="flex:1; min-width:0;">
         <div class="stat-block" style="margin-bottom:0; height:100%;">
           <div class="stat-label">Today's Feedings</div>
           <ul class="recent-list" id="food-list">
@@ -410,7 +412,7 @@
           </ul>
         </div>
       </div>
-      <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+      <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:5px;">
         <div style="display:flex; gap:5px;">
           <button class="btn btn-breakfast" onclick="recordFood('breakfast')" style="margin-bottom:0;">
             🌅 Breakfast
