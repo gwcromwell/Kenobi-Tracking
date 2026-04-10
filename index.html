@@ -437,18 +437,16 @@
   <div class="card full-width">
     <div class="card-title"><span class="icon">⚠️</span> Accident / Incident</div>
 
-    <div style="display:flex; gap:10px; align-items:center;">
-      <div style="flex:1;">
-        <div class="incident-big" style="margin-bottom:4px;">
-          <div class="incident-days" id="incident-days">—</div>
-          <div class="incident-days-label">days since last accident</div>
-        </div>
-        <div class="incident-date" id="incident-date" style="margin-bottom:0;">No accidents recorded</div>
+    <div style="display:grid; grid-template-columns:1fr auto; grid-template-rows:auto auto; gap:4px 10px; align-items:center;">
+      <div class="incident-big" style="margin-bottom:0;">
+        <div class="incident-days" id="incident-days">—</div>
+        <div class="incident-days-label">days since last accident</div>
       </div>
-      <button class="btn-sq btn-incident" onclick="recordIncident()">
+      <button class="btn-sq btn-incident" onclick="recordIncident()" style="grid-row:1/3; align-self:center;">
         <span class="sq-icon">⚠️</span>
         <span>Whoops</span>
       </button>
+      <div class="incident-date" id="incident-date" style="margin-bottom:0;">No accidents recorded</div>
     </div>
   </div>
 
