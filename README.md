@@ -26,6 +26,12 @@ A real-time dog habit tracker for tracking Kenobi's daily water intake, bathroom
 - Day count is calendar-based: an accident recorded any time today shows **0**, yesterday shows **1**, and so on
 - The last accident date and time are displayed inside the counter box
 - Tap the **Whoops** button to record a new accident
+- Full history of every accident is stored in Firestore for export purposes
+
+### Export
+- Download a CSV of all logged events for the **Last 30 Days**, **Last 90 Days**, or **All Time**
+- Export covers all four data types (Water, Bathroom, Feeding, Incident) in a single chronologically sorted file
+- The export section is located at the bottom of the page
 
 ## Layout
 
@@ -36,12 +42,13 @@ The app uses a two-column card grid optimised to fit an iPad screen without scro
 | 1 | Water | Bathroom |
 | 2 | Feeding (full width) | |
 | 3 | Accident / Incident (full width) | |
+| 4 | Export (full width) | |
 
 On phones (≤600px) all cards stack into a single column, and the Feeding card's list and buttons stack vertically for comfortable tap targets.
 
 ## Sharing
 
-Multiple devices can view and update the same session in real time. Tap **Copy Sharing Link** and send the URL to another person. Anyone with the link reads from and writes to the same data.
+Multiple devices can view and update the same session in real time. The **Copy Sharing Link** button is located at the very bottom of the page — tap it and send the URL to another person. Anyone with the link reads from and writes to the same data.
 
 Sessions are identified by a UUID in the `?session=` query parameter. Opening the app without a session parameter generates a new UUID automatically.
 
@@ -57,7 +64,8 @@ Sessions are identified by a UUID in the `?session=` query parameter. Opening th
 trackers/{sessionId}
   waterLog:    string[]                      // ISO timestamp per watering
   bathroomLog: { time, type, diaper }[]      // type: "piss" | "poop" | "both"
-  incidentTs:  string | null                 // ISO timestamp of last accident
+  incidentTs:  string | null                 // ISO timestamp of last accident (drives UI counter)
+  incidentLog: string[]                      // ISO timestamp per accident (full history for export)
   foodLog:     { time, meal, pumpkin }[]     // meal: "breakfast" | "lunch" | "dinner"
 ```
 
