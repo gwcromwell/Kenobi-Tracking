@@ -316,6 +316,21 @@
 
     #toast.show { transform: translateX(-50%) translateY(0); }
 
+    /* EXPORT */
+    .export-section {
+      max-width: 960px;
+      margin: 10px auto 20px;
+    }
+
+    .btn-export {
+      background: #4a5568;
+      color: #fff;
+      box-shadow: 0 3px 8px rgba(74,85,104,0.3);
+      font-size: 0.85rem;
+    }
+
+    .btn-export:hover { background: #2d3748; }
+
   </style>
 </head>
 <body>
@@ -455,6 +470,18 @@
 
 </div>
 
+<!-- EXPORT SECTION -->
+<div class="export-section">
+  <div class="card">
+    <div class="card-title"><span class="icon">📤</span> Export Data</div>
+    <div style="display:flex; gap:6px;">
+      <button class="btn btn-export" onclick="exportCSV(30)">Last 30 Days</button>
+      <button class="btn btn-export" onclick="exportCSV(90)">Last 90 Days</button>
+      <button class="btn btn-export" onclick="exportCSV(null)">All Time</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -498,7 +525,8 @@
   // ─── State (seeded from localStorage for instant first paint) ─────
   let waterLog    = load('waterLog')    || [];   // array of ISO strings
   let bathroomLog = load('bathroomLog') || [];   // [{time, type, diaper}]
-  let incidentTs  = load('incidentTs')  || null; // ISO string or null
+  let incidentTs  = load('incidentTs')  || null; // ISO string or null — most recent, drives the UI counter
+  let incidentLog = load('incidentLog') || [];   // [{time}] — full history of every incident reset, for export
   let foodLog     = load('foodLog')     || [];   // [{time, meal, pumpkin}]
   let diaperOn    = false;
   let pumpkinOn   = false;
@@ -623,7 +651,11 @@
 
   // ─── Incident ─────────────────────────────────────────────────────────
   function recordIncident() {
-    docRef.set({ incidentTs: new Date().toISOString() }, { merge: true });
+    const ts = new Date().toISOString();
+    docRef.set({
+      incidentTs:  ts,
+      incidentLog: firebase.firestore.FieldValue.arrayUnion({ time: ts })
+    }, { merge: true });
     toast('⚠️ Accident recorded');
     // onSnapshot fires on this device too and will re-render
   }
@@ -687,6 +719,65 @@
     }).join('');
   }
 
+  // ─── Export ───────────────────────────────────────────────────────────
+  function exportCSV(days) {
+    // cutoff = start of (today - days + 1) so "30 days" includes today through 29 days ago
+    let cutoff = null;
+    if (days !== null) {
+      const now = new Date();
+      cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days + 1).getTime();
+    }
+
+    const inRange = iso => cutoff === null || new Date(iso).getTime() >= cutoff;
+    const fmtD    = iso => new Date(iso).toLocaleDateString();
+    const fmtT    = iso => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const entries = []; // { iso, row }
+
+    waterLog.filter(inRange).forEach(ts =>
+      entries.push({ iso: ts, row: [fmtD(ts), fmtT(ts), 'Water', '', ''] })
+    );
+
+    const typeLabels = { piss: 'Pee', poop: 'Poop', both: 'Both' };
+    bathroomLog.filter(e => inRange(e.time)).forEach(e =>
+      entries.push({ iso: e.time, row: [fmtD(e.time), fmtT(e.time), 'Bathroom', typeLabels[e.type] || e.type, e.diaper ? 'Diaper' : ''] })
+    );
+
+    const mealLabels = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
+    foodLog.filter(e => inRange(e.time)).forEach(e =>
+      entries.push({ iso: e.time, row: [fmtD(e.time), fmtT(e.time), 'Feeding', mealLabels[e.meal] || e.meal, e.pumpkin ? 'Pumpkin' : ''] })
+    );
+
+    incidentLog.filter(e => inRange(e.time)).forEach(e =>
+      entries.push({ iso: e.time, row: [fmtD(e.time), fmtT(e.time), 'Incident', '', ''] })
+    );
+
+    if (entries.length === 0) {
+      toast('No data in selected range');
+      return;
+    }
+
+    entries.sort((a, b) => new Date(a.iso) - new Date(b.iso));
+
+    const header = ['Date', 'Time', 'Category', 'Detail', 'Note'];
+    const esc    = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const csv    = [header, ...entries.map(e => e.row)]
+      .map(r => r.map(esc).join(','))
+      .join('\r\n');
+
+    const blob  = new Blob([csv], { type: 'text/csv' });
+    const url   = URL.createObjectURL(blob);
+    const a     = document.createElement('a');
+    const label = days === null ? 'all-time' : `${days}-days`;
+    a.href     = url;
+    a.download = `kenobi-tracker_${label}_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('📤 Export ready!');
+  }
+
   // ─── Sharing ─────────────────────────────────────────────────────────
   function copyLink() {
     navigator.clipboard.writeText(location.href)
@@ -715,11 +806,21 @@
       waterLog    = data.waterLog    || [];
       bathroomLog = data.bathroomLog || [];
       incidentTs  = data.incidentTs  || null;
+      incidentLog = data.incidentLog || [];
       foodLog     = data.foodLog     || [];
+
+      // One-time migration: if incidentTs exists but incidentLog is empty,
+      // seed incidentLog from incidentTs so existing incident history is preserved in exports.
+      if (incidentTs && incidentLog.length === 0) {
+        incidentLog = [{ time: incidentTs }];
+        docRef.set({ incidentLog }, { merge: true });
+      }
+
       // Mirror to localStorage as offline cache
       save('waterLog',    waterLog);
       save('bathroomLog', bathroomLog);
       save('incidentTs',  incidentTs);
+      save('incidentLog', incidentLog);
       save('foodLog',     foodLog);
       tick(); // re-render all cards with latest data from any device
     });
