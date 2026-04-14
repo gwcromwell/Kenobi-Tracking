@@ -442,7 +442,7 @@
     </div>
 
     <button class="btn btn-piss" onclick="recordBathroom('piss')">
-      📛 Pee Pee Time
+      🚿 Pee Pee Time
     </button>
     <button class="btn btn-poop" onclick="recordBathroom('poop')">
       💩 Poo Poo Time
@@ -540,7 +540,7 @@
     <div class="modal-title">⚠️ What happened?</div>
     <div style="display:flex; gap:8px;">
       <button class="btn btn-puke" onclick="recordIncident('puke')" style="margin-bottom:0;">🤢 Puke</button>
-      <button class="btn btn-piss" onclick="recordIncident('pee')" style="margin-bottom:0;">💛 Pee</button>
+      <button class="btn btn-piss" onclick="recordIncident('pee')" style="margin-bottom:0;">🚿 Pee</button>
       <button class="btn btn-poop" onclick="recordIncident('poop')" style="margin-bottom:0;">💩 Poop</button>
     </div>
     <button class="btn-cancel" onclick="closeIncidentModal()">Cancel</button>
@@ -682,7 +682,7 @@
     diaperOn = false;
     document.getElementById('diaper-toggle').classList.remove('active');
     document.getElementById('diaper-check').textContent = '';
-    const labels = { piss:'📛 Pee Pee Time', poop:'💩 Poo Poo Time', both:'✨ All Poo Poo Time is Pee Pee Time' };
+    const labels = { piss:'🚿 Pee Pee Time', poop:'💩 Poo Poo Time', both:'✨ All Poo Poo Time is Pee Pee Time' };
     toast(`${labels[type]} recorded!`);
     // onSnapshot fires on this device too and will re-render
   }
@@ -734,7 +734,7 @@
       incidentLog: firebase.firestore.FieldValue.arrayUnion({ time: ts, type })
     }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
-    const typeLabels = { puke: '🤢 Puke', pee: '💛 Pee', poop: '💩 Poop' };
+    const typeLabels = { puke: '🤢 Puke', pee: '🚿 Pee', poop: '💩 Poop' };
     toast(`⚠️ Accident recorded — ${typeLabels[type] || type}`);
     // onSnapshot fires on this device too and will re-render
   }
