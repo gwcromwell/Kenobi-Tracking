@@ -24,13 +24,13 @@ A real-time dog habit tracker for tracking Kenobi's daily water intake, bathroom
 ### Accident / Incident
 - Tracks the most recent accident with a large days-since counter
 - Day count is calendar-based: an accident recorded any time today shows **0**, yesterday shows **1**, and so on
-- The last accident date and time are displayed inside the counter box
-- Tap the **Whoops** button to record a new accident
-- Full history of every accident is stored in Firestore for export purposes
+- The last accident date, time, and type are displayed inside the counter box
+- Tap the **Whoops** button to open a type picker, then select **Puke**, **Pee**, or **Poop** to record the accident; tap the backdrop or Cancel to dismiss without recording
+- Full history of every accident (including type) is stored in Firestore for export purposes
 
 ### Export
 - Download a CSV of all logged events for the **Last 30 Days**, **Last 90 Days**, or **All Time**
-- Export covers all four data types (Water, Bathroom, Feeding, Incident) in a single chronologically sorted file
+- Export covers all four data types (Water, Bathroom, Feeding, Incident) in a single chronologically sorted file; the **Detail** column for Incident rows contains the accident type (Puke, Pee, or Poop)
 - The export section is located at the bottom of the page
 
 ## Layout
@@ -65,7 +65,7 @@ trackers/{sessionId}
   waterLog:    string[]                      // ISO timestamp per watering
   bathroomLog: { time, type, diaper }[]      // type: "piss" | "poop" | "both"
   incidentTs:  string | null                 // ISO timestamp of last accident (drives UI counter)
-  incidentLog: string[]                      // ISO timestamp per accident (full history for export)
+  incidentLog: { time, type }[]             // type: "puke" | "pee" | "poop" — full history for export
   foodLog:     { time, meal, pumpkin }[]     // meal: "breakfast" | "lunch" | "dinner"
 ```
 
