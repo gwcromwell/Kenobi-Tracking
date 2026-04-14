@@ -331,6 +331,57 @@
 
     .btn-export:hover { background: #2d3748; }
 
+    /* INCIDENT TYPE MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px 20px;
+      max-width: 320px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 16px;
+    }
+
+    .btn-puke {
+      background: #48bb78;
+      color: #fff;
+      box-shadow: 0 3px 8px rgba(72,187,120,0.4);
+    }
+
+    .btn-cancel {
+      margin-top: 14px;
+      background: none;
+      border: none;
+      color: #a0aec0;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
   </style>
 </head>
 <body>
@@ -455,7 +506,7 @@
         <div class="incident-days-label">days since last accident</div>
         <div class="incident-date" id="incident-date" style="margin-bottom:0;">No accidents recorded</div>
       </div>
-      <button class="btn-sq btn-incident" onclick="recordIncident()">
+      <button class="btn-sq btn-incident" onclick="showIncidentModal()">
         <span class="sq-icon">⚠️</span>
         <span>Whoops</span>
       </button>
@@ -481,6 +532,19 @@
   <button onclick="copyLink()" style="background:none;border:1px solid #cbd5e0;border-radius:8px;padding:6px 14px;font-size:0.8rem;color:#4a5568;cursor:pointer;">
     🔗 Copy Sharing Link
   </button>
+</div>
+
+<!-- INCIDENT TYPE MODAL -->
+<div class="modal-overlay" id="incident-modal" onclick="if(event.target===this)closeIncidentModal()">
+  <div class="modal-box">
+    <div class="modal-title">⚠️ What happened?</div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-puke" onclick="recordIncident('puke')" style="margin-bottom:0;">🤢 Puke</button>
+      <button class="btn btn-piss" onclick="recordIncident('pee')" style="margin-bottom:0;">💛 Pee</button>
+      <button class="btn btn-poop" onclick="recordIncident('poop')" style="margin-bottom:0;">💩 Poop</button>
+    </div>
+    <button class="btn-cancel" onclick="closeIncidentModal()">Cancel</button>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -651,13 +715,23 @@
   }
 
   // ─── Incident ─────────────────────────────────────────────────────────
-  function recordIncident() {
+  function showIncidentModal() {
+    document.getElementById('incident-modal').classList.add('show');
+  }
+
+  function closeIncidentModal() {
+    document.getElementById('incident-modal').classList.remove('show');
+  }
+
+  function recordIncident(type) {
+    closeIncidentModal();
     const ts = new Date().toISOString();
     docRef.set({
       incidentTs:  ts,
-      incidentLog: firebase.firestore.FieldValue.arrayUnion({ time: ts })
+      incidentLog: firebase.firestore.FieldValue.arrayUnion({ time: ts, type })
     }, { merge: true });
-    toast('⚠️ Accident recorded');
+    const typeLabels = { puke: '🤢 Puke', pee: '💛 Pee', poop: '💩 Poop' };
+    toast(`⚠️ Accident recorded — ${typeLabels[type] || type}`);
     // onSnapshot fires on this device too and will re-render
   }
 
@@ -670,8 +744,11 @@
       daysEl.textContent = '—';
       dateEl.textContent = 'No accidents recorded';
     } else {
+      const lastEntry = incidentLog.find(e => e.time === incidentTs);
+      const typeLabels = { puke: 'Puke', pee: 'Pee', poop: 'Poop' };
+      const typeStr = lastEntry && lastEntry.type ? ` (${typeLabels[lastEntry.type] || lastEntry.type})` : '';
       daysEl.textContent = days;
-      dateEl.textContent = `Last accident: ${fmtTime(incidentTs)}`;
+      dateEl.textContent = `Last accident: ${fmtTime(incidentTs)}${typeStr}`;
     }
   }
 
@@ -749,8 +826,9 @@
       entries.push({ iso: e.time, row: [fmtD(e.time), fmtT(e.time), 'Feeding', mealLabels[e.meal] || e.meal, e.pumpkin ? 'Pumpkin' : ''] })
     );
 
+    const incidentTypeLabels = { puke: 'Puke', pee: 'Pee', poop: 'Poop' };
     incidentLog.filter(e => inRange(e.time)).forEach(e =>
-      entries.push({ iso: e.time, row: [fmtD(e.time), fmtT(e.time), 'Incident', '', ''] })
+      entries.push({ iso: e.time, row: [fmtD(e.time), fmtT(e.time), 'Incident', incidentTypeLabels[e.type] || e.type || '', ''] })
     );
 
     if (entries.length === 0) {
