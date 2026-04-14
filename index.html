@@ -635,7 +635,8 @@
 
   // ─── Water ─────────────────────────────────────────────────────────────
   function giveWater() {
-    docRef.set({ waterLog: firebase.firestore.FieldValue.arrayUnion(new Date().toISOString()) }, { merge: true });
+    docRef.set({ waterLog: firebase.firestore.FieldValue.arrayUnion(new Date().toISOString()) }, { merge: true })
+      .catch(() => toast('⚠️ Save failed, try again'));
     toast('💧 Water recorded!');
     // onSnapshot fires on this device too and will re-render
   }
@@ -646,8 +647,9 @@
 
     document.getElementById('water-count').textContent = todayEntries.length;
 
-    const lastAll = waterLog.length ? waterLog[waterLog.length - 1] : null;
-    document.getElementById('water-elapsed').textContent = elapsedStr(lastAll);
+    const sorted = [...waterLog].sort();
+    const last = sorted.length ? sorted[sorted.length - 1] : null;
+    document.getElementById('water-elapsed').textContent = elapsedStr(last);
 
     const ul = document.getElementById('water-list');
     if (todayEntries.length === 0) {
@@ -674,7 +676,8 @@
   // ─── Bathroom ─────────────────────────────────────────────────────────
   function recordBathroom(type) {
     const entry = { time: new Date().toISOString(), type, diaper: diaperOn };
-    docRef.set({ bathroomLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
+    docRef.set({ bathroomLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true })
+      .catch(() => toast('⚠️ Save failed, try again'));
     // auto-reset diaper after recording
     diaperOn = false;
     document.getElementById('diaper-toggle').classList.remove('active');
@@ -729,7 +732,8 @@
     docRef.set({
       incidentTs:  ts,
       incidentLog: firebase.firestore.FieldValue.arrayUnion({ time: ts, type })
-    }, { merge: true });
+    }, { merge: true })
+      .catch(() => toast('⚠️ Save failed, try again'));
     const typeLabels = { puke: '🤢 Puke', pee: '💛 Pee', poop: '💩 Poop' };
     toast(`⚠️ Accident recorded — ${typeLabels[type] || type}`);
     // onSnapshot fires on this device too and will re-render
@@ -878,7 +882,7 @@
 
   // Sign in anonymously (invisible to user) so Firestore security rules are satisfied,
   // then attach a real-time listener that keeps all devices in sync.
-  auth.signInAnonymously().then(() => {
+  auth.signInAnonymously().catch(() => toast('⚠️ Could not connect to sync service')).then(() => {
     docRef.onSnapshot(snap => {
       if (!snap.exists) return;
       const data = snap.data();
