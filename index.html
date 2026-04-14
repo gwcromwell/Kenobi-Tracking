@@ -148,7 +148,7 @@
       box-shadow: 0 3px 8px rgba(107,70,193,0.4);
     }
 
-    /* DIAPER TOGGLE */
+    /* DIAPER / PUMPKIN TOGGLE */
     .diaper-row {
       display: flex;
       align-items: center;
@@ -382,6 +382,15 @@
       cursor: pointer;
     }
 
+    /* LAYOUT UTILITIES — replaces repeated inline styles throughout the HTML */
+    .food-cols  { display: flex; gap: 10px; align-items: stretch; }
+    .stat-row   { display: flex; gap: 6px; margin-bottom: 6px; }
+    .stat-center { flex: 1; text-align: center; }
+    .stat-wide  { flex: 2; }
+    .stat-unit  { font-size: 0.75rem; color: #a0aec0; }
+    .hint-text  { font-size: 0.75rem; color: #718096; }
+    .mb-0       { margin-bottom: 0 !important; }
+
   </style>
 </head>
 <body>
@@ -390,23 +399,23 @@
 
 <div class="grid">
 
-  <!-- WATER CARD -->
+  <!-- WATER CARD: logs individual watering events; shows today's count and elapsed time since last -->
   <div class="card">
     <div class="card-title"><span class="icon">💧</span> Water</div>
 
-    <div style="display:flex; gap:6px; margin-bottom:6px;">
-      <div class="stat-block" style="flex:1; text-align:center;">
+    <div class="stat-row">
+      <div class="stat-block stat-center">
         <div class="stat-label">Today</div>
         <div class="stat-value big" id="water-count">0</div>
-        <div style="font-size:0.75rem;color:#a0aec0;">waterings</div>
+        <div class="stat-unit">waterings</div>
       </div>
-      <div class="stat-block" style="flex:2;">
+      <div class="stat-block stat-wide">
         <div class="stat-label">Time Since Last</div>
         <div class="stat-value elapsed" id="water-elapsed">—</div>
       </div>
     </div>
 
-    <div class="stat-block" style="margin-bottom:6px;">
+    <div class="stat-block">
       <div class="stat-label">Today's Waterings</div>
       <ul class="recent-list" id="water-list">
         <li><span class="stat-value none">No waterings recorded today</span></li>
@@ -418,23 +427,23 @@
     </button>
   </div>
 
-  <!-- BATHROOM CARD -->
+  <!-- BATHROOM CARD: records outdoor bathroom trips with type (pee/poop/both) and optional diaper flag -->
   <div class="card">
     <div class="card-title"><span class="icon">🚶</span> Bathroom</div>
 
-    <div style="display:flex; gap:6px; margin-bottom:6px;">
-      <div class="stat-block" style="flex:1; text-align:center;">
+    <div class="stat-row">
+      <div class="stat-block stat-center">
         <div class="stat-label">Walks Today</div>
         <div class="stat-value big" id="walk-count">0</div>
-        <div style="font-size:0.75rem;color:#a0aec0;">walks</div>
+        <div class="stat-unit">walks</div>
       </div>
-      <div class="stat-block" style="flex:2;">
+      <div class="stat-block stat-wide">
         <div class="stat-label">Time Since Last Walk</div>
         <div class="stat-value elapsed" id="walk-elapsed">—</div>
       </div>
     </div>
 
-    <div class="stat-block" style="margin-bottom:6px;">
+    <div class="stat-block">
       <div class="stat-label">Today's Outings</div>
       <ul class="recent-list" id="bathroom-list">
         <li><span class="stat-value none">No outings recorded today</span></li>
@@ -451,22 +460,23 @@
       ✨ All Poo Poo Time is Pee Pee Time
     </button>
 
+    <!-- Toggle this before pressing a bathroom button to flag that a diaper was used -->
     <div class="diaper-row" id="diaper-toggle" onclick="toggleDiaper()">
       <div class="diaper-check" id="diaper-check"></div>
       <div>
         <div class="diaper-label">Diaper Used</div>
-        <div style="font-size:0.75rem;color:#718096;">Toggle before recording</div>
+        <div class="hint-text">Toggle before recording</div>
       </div>
     </div>
   </div>
 
-  <!-- FOOD CARD -->
+  <!-- FOOD CARD: logs meals (breakfast/lunch/dinner) with optional pumpkin supplement flag -->
   <div class="card full-width">
     <div class="card-title"><span class="icon">🍽️</span> Feeding</div>
 
-    <div class="food-cols" style="display:flex; gap:10px; align-items:stretch;">
+    <div class="food-cols">
       <div style="flex:1; min-width:0;">
-        <div class="stat-block" style="margin-bottom:0; height:100%;">
+        <div class="stat-block mb-0" style="height:100%;">
           <div class="stat-label">Today's Feedings</div>
           <ul class="recent-list" id="food-list">
             <li><span class="stat-value none">No feedings recorded today</span></li>
@@ -475,36 +485,37 @@
       </div>
       <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:5px;">
         <div style="display:flex; gap:5px;">
-          <button class="btn btn-breakfast" onclick="recordFood('breakfast')" style="margin-bottom:0;">
+          <button class="btn btn-breakfast mb-0" onclick="recordFood('breakfast')">
             🌅 Breakfast
           </button>
-          <button class="btn btn-lunch" onclick="recordFood('lunch')" style="margin-bottom:0;">
+          <button class="btn btn-lunch mb-0" onclick="recordFood('lunch')">
             ☀️ Lunch
           </button>
-          <button class="btn btn-dinner" onclick="recordFood('dinner')" style="margin-bottom:0;">
+          <button class="btn btn-dinner mb-0" onclick="recordFood('dinner')">
             🌙 Dinner
           </button>
         </div>
-        <div class="diaper-row" id="pumpkin-toggle" onclick="togglePumpkin()" style="margin-bottom:0;">
+        <!-- Toggle this before pressing a meal button to record wet food + pumpkin supplement -->
+        <div class="diaper-row mb-0" id="pumpkin-toggle" onclick="togglePumpkin()">
           <div class="diaper-check" id="pumpkin-check"></div>
           <div>
             <div class="diaper-label">Add Pumpkin</div>
-            <div style="font-size:0.75rem;color:#718096;">Toggle for wet food + pumpkin</div>
+            <div class="hint-text">Toggle for wet food + pumpkin</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- INCIDENT CARD -->
+  <!-- INCIDENT CARD: tracks accidents and shows a running "days since last incident" counter -->
   <div class="card full-width">
     <div class="card-title"><span class="icon">⚠️</span> Accident / Incident</div>
 
     <div style="display:flex; gap:10px; align-items:center;">
-      <div class="incident-big" style="flex:1; margin-bottom:0;">
+      <div class="incident-big mb-0" style="flex:1;">
         <div class="incident-days" id="incident-days">—</div>
         <div class="incident-days-label">days since last accident</div>
-        <div class="incident-date" id="incident-date" style="margin-bottom:0;">No accidents recorded</div>
+        <div class="incident-date mb-0" id="incident-date">No accidents recorded</div>
       </div>
       <button class="btn-sq btn-incident" onclick="showIncidentModal()">
         <span class="sq-icon">⚠️</span>
@@ -515,7 +526,7 @@
 
 </div>
 
-<!-- EXPORT SECTION -->
+<!-- EXPORT SECTION: download all logged data as a CSV file for a chosen time range -->
 <div class="export-section">
   <div class="card">
     <div class="card-title"><span class="icon">📤</span> Export Data</div>
@@ -527,21 +538,21 @@
   </div>
 </div>
 
-<!-- SHARING -->
+<!-- SHARING: copies the current session URL to the clipboard for family members to join -->
 <div style="text-align:center; margin-top:12px; margin-bottom:4px;">
   <button onclick="copyLink()" style="background:none;border:1px solid #cbd5e0;border-radius:8px;padding:6px 14px;font-size:0.8rem;color:#4a5568;cursor:pointer;">
     🔗 Copy Sharing Link
   </button>
 </div>
 
-<!-- INCIDENT TYPE MODAL -->
+<!-- INCIDENT TYPE MODAL: shown when the Whoops button is pressed; selects the accident type -->
 <div class="modal-overlay" id="incident-modal" onclick="if(event.target===this)closeIncidentModal()">
   <div class="modal-box">
     <div class="modal-title">⚠️ What happened?</div>
     <div style="display:flex; gap:8px;">
-      <button class="btn btn-puke" onclick="recordIncident('puke')" style="margin-bottom:0;">🤢 Puke</button>
-      <button class="btn btn-piss" onclick="recordIncident('pee')" style="margin-bottom:0;">🚿 Pee</button>
-      <button class="btn btn-poop" onclick="recordIncident('poop')" style="margin-bottom:0;">💩 Poop</button>
+      <button class="btn btn-puke mb-0" onclick="recordIncident('puke')">🤢 Puke</button>
+      <button class="btn btn-piss mb-0" onclick="recordIncident('pee')">🚿 Pee</button>
+      <button class="btn btn-poop mb-0" onclick="recordIncident('poop')">💩 Poop</button>
     </div>
     <button class="btn-cancel" onclick="closeIncidentModal()">Cancel</button>
   </div>
@@ -569,10 +580,12 @@
   const load = key => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
   const save = (key, val) => localStorage.setItem(key, JSON.stringify(val));
 
-  // ─── Session ID — ?session=uuid query param is the shareable room code ───
-  // Using a query parameter instead of a hash fragment because hash fragments
-  // are frequently stripped by iMessage, SMS, and other messaging apps before
-  // the link is opened, causing a fresh UUID to be generated on the second device.
+  // ─── Session ID ────────────────────────────────────────────────────
+  // Uses ?session=uuid query param as the shareable room code.
+  // Query params (not hash fragments) are used because hash fragments are
+  // frequently stripped by iMessage/SMS before the link is opened, which
+  // would generate a new UUID on the second device instead of joining the
+  // same session. Falls back to localStorage so page reloads keep the same session.
   function getSessionId() {
     const params = new URLSearchParams(location.search);
     let id = params.get('session');
@@ -591,18 +604,44 @@
   let waterLog    = load('waterLog')    || [];   // array of ISO strings
   let bathroomLog = load('bathroomLog') || [];   // [{time, type, diaper}]
   let incidentTs  = load('incidentTs')  || null; // ISO string or null — most recent, drives the UI counter
-  let incidentLog = load('incidentLog') || [];   // [{time}] — full history of every incident reset, for export
+  let incidentLog = load('incidentLog') || [];   // [{time, type}] — full history for export
   let foodLog     = load('foodLog')     || [];   // [{time, meal, pumpkin}]
   let diaperOn    = false;
   let pumpkinOn   = false;
 
+  // ─── Label maps — defined once here and reused throughout ──────────
+
+  // Bathroom: toast labels (with emoji), badge display text, badge CSS class, CSV export text
+  const BATHROOM_TOAST_LABELS  = { piss: '🚿 Pee Pee Time', poop: '💩 Poo Poo Time', both: '✨ All Poo Poo Time is Pee Pee Time' };
+  const BATHROOM_BADGE_LABELS  = { piss: 'Pee Pee', poop: 'Poo Poo', both: 'Both' };
+  const BATHROOM_BADGE_CLASS   = { piss: 'badge-piss', poop: 'badge-poop', both: 'badge-both' };
+  const BATHROOM_EXPORT_LABELS = { piss: 'Pee', poop: 'Poop', both: 'Both' };
+
+  // Food: toast labels (with emoji), badge display text, badge CSS class
+  const MEAL_TOAST_LABELS = { breakfast: '🌅 Breakfast', lunch: '☀️ Lunch', dinner: '🌙 Dinner' };
+  const MEAL_BADGE_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
+  const MEAL_BADGE_CLASS  = { breakfast: 'badge-breakfast', lunch: 'badge-lunch', dinner: 'badge-dinner' };
+
+  // Incident: emoji labels for toasts, plain-text labels for the counter display and CSV export
+  const INCIDENT_EMOJI_LABELS = { puke: '🤢 Puke', pee: '🚿 Pee', poop: '💩 Poop' };
+  const INCIDENT_TYPE_LABELS  = { puke: 'Puke', pee: 'Pee', poop: 'Poop' };
+
   // ─── Utilities ──────────────────────────────────────────────────
+
+  // Format an ISO timestamp as "hh:mm AM/PM Mon DD"
   function fmtTime(iso) {
     const d = new Date(iso);
     return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) +
            ' ' + d.toLocaleDateString([], {month:'short', day:'numeric'});
   }
 
+  // Format an ISO timestamp as a locale date string (used for CSV export rows)
+  function fmtDate(iso) { return new Date(iso).toLocaleDateString(); }
+
+  // Format an ISO timestamp as an hh:mm time-only string (used for CSV export rows)
+  function fmtTimeOnly(iso) { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+
+  // Return a human-readable elapsed-time string ("14m ago", "2h 5m ago", etc.)
   function elapsedStr(iso) {
     if (!iso) return '—';
     const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -612,11 +651,20 @@
     return m > 0 ? `${h}h ${m}m ago` : `${h}h ago`;
   }
 
+  // Count how many items in a flat ISO-string array fall on today's date
   function todayCount(log) {
     const today = new Date().toDateString();
     return log.filter(ts => new Date(ts).toDateString() === today).length;
   }
 
+  // Filter a log array to entries from today.
+  // getTime extracts the timestamp from each entry (defaults to identity for flat string arrays).
+  function filterToday(log, getTime = ts => ts) {
+    const today = new Date().toDateString();
+    return log.filter(e => new Date(getTime(e)).toDateString() === today);
+  }
+
+  // Return the number of full calendar days between the given ISO timestamp and today
   function daysBetween(iso) {
     if (!iso) return null;
     const d = new Date(iso);
@@ -626,6 +674,7 @@
     return Math.round((today - incidentDay) / 86400000);
   }
 
+  // Show a brief notification toast at the bottom of the screen for 2.2 seconds
   function toast(msg) {
     const el = document.getElementById('toast');
     el.textContent = msg;
@@ -633,7 +682,41 @@
     setTimeout(() => el.classList.remove('show'), 2200);
   }
 
+  // ─── Toggle helpers ──────────────────────────────────────────────
+
+  // Apply visual active/inactive state to a diaper or pumpkin toggle row.
+  // Shared by toggleDiaper() and togglePumpkin() to avoid duplicating DOM logic.
+  function applyToggle(toggleId, checkId, isOn) {
+    document.getElementById(toggleId).classList.toggle('active', isOn);
+    document.getElementById(checkId).textContent = isOn ? '✓' : '';
+  }
+
+  function toggleDiaper() {
+    diaperOn = !diaperOn;
+    applyToggle('diaper-toggle', 'diaper-check', diaperOn);
+  }
+
+  function togglePumpkin() {
+    pumpkinOn = !pumpkinOn;
+    applyToggle('pumpkin-toggle', 'pumpkin-check', pumpkinOn);
+  }
+
+  // ─── Render helper ───────────────────────────────────────────────
+
+  // Populate a <ul> list element with rendered entries.
+  // Shows an empty-state message when the entries array is empty;
+  // otherwise maps each entry through formatter() and injects the resulting HTML.
+  function renderList(elementId, entries, formatter, emptyMsg) {
+    const ul = document.getElementById(elementId);
+    if (entries.length === 0) {
+      ul.innerHTML = `<li><span class="stat-value none">${emptyMsg}</span></li>`;
+      return;
+    }
+    ul.innerHTML = entries.map(formatter).join('');
+  }
+
   // ─── Water ─────────────────────────────────────────────────────────────
+
   function giveWater() {
     docRef.set({ waterLog: firebase.firestore.FieldValue.arrayUnion(new Date().toISOString()) }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
@@ -642,82 +725,55 @@
   }
 
   function renderWater() {
-    const today = new Date().toDateString();
-    const todayEntries = waterLog.filter(ts => new Date(ts).toDateString() === today).reverse();
-
+    const todayEntries = filterToday(waterLog).reverse();
     document.getElementById('water-count').textContent = todayEntries.length;
 
     const sorted = [...waterLog].sort();
-    const last = sorted.length ? sorted[sorted.length - 1] : null;
-    document.getElementById('water-elapsed').textContent = elapsedStr(last);
+    document.getElementById('water-elapsed').textContent = elapsedStr(sorted.length ? sorted[sorted.length - 1] : null);
 
-    const ul = document.getElementById('water-list');
-    if (todayEntries.length === 0) {
-      ul.innerHTML = '<li><span class="stat-value none">No waterings recorded today</span></li>';
-      return;
-    }
-    ul.innerHTML = todayEntries.map(ts =>
+    renderList('water-list', todayEntries, ts =>
       `<li>
         <span class="recent-time">${fmtTime(ts)}</span>
         <span class="recent-ago">${elapsedStr(ts)}</span>
-      </li>`
-    ).join('');
-  }
-
-  // ─── Diaper ───────────────────────────────────────────────────────────
-  function toggleDiaper() {
-    diaperOn = !diaperOn;
-    const row   = document.getElementById('diaper-toggle');
-    const check = document.getElementById('diaper-check');
-    row.classList.toggle('active', diaperOn);
-    check.textContent = diaperOn ? '✓' : '';
+      </li>`,
+      'No waterings recorded today'
+    );
   }
 
   // ─── Bathroom ─────────────────────────────────────────────────────────
+
   function recordBathroom(type) {
     const entry = { time: new Date().toISOString(), type, diaper: diaperOn };
     docRef.set({ bathroomLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
-    // auto-reset diaper after recording
+    // Auto-reset diaper toggle after recording
     diaperOn = false;
-    document.getElementById('diaper-toggle').classList.remove('active');
-    document.getElementById('diaper-check').textContent = '';
-    const labels = { piss:'🚿 Pee Pee Time', poop:'💩 Poo Poo Time', both:'✨ All Poo Poo Time is Pee Pee Time' };
-    toast(`${labels[type]} recorded!`);
+    applyToggle('diaper-toggle', 'diaper-check', false);
+    toast(`${BATHROOM_TOAST_LABELS[type]} recorded!`);
     // onSnapshot fires on this device too and will re-render
   }
 
   function renderBathroom() {
-    const today = new Date().toDateString();
-    const todayEntries = bathroomLog.filter(entry => new Date(entry.time).toDateString() === today).reverse();
-
+    const todayEntries = filterToday(bathroomLog, e => e.time).reverse();
     document.getElementById('walk-count').textContent = todayEntries.length;
-    const lastWalk = bathroomLog.length ? bathroomLog[bathroomLog.length - 1].time : null;
-    document.getElementById('walk-elapsed').textContent = elapsedStr(lastWalk);
+    document.getElementById('walk-elapsed').textContent =
+      elapsedStr(bathroomLog.length ? bathroomLog[bathroomLog.length - 1].time : null);
 
-    const ul = document.getElementById('bathroom-list');
-    if (todayEntries.length === 0) {
-      ul.innerHTML = '<li><span class="stat-value none">No outings recorded today</span></li>';
-      return;
-    }
-    const typeLabels = { piss: 'Pee Pee', poop: 'Poo Poo', both: 'Both' };
-    const typeClass  = { piss: 'badge-piss', poop: 'badge-poop', both: 'badge-both' };
-    ul.innerHTML = todayEntries.map(entry => {
-      const diaperBadge = entry.diaper
-        ? `<span class="badge badge-diaper">🨲</span>`
-        : '';
+    renderList('bathroom-list', todayEntries, entry => {
+      const diaperBadge = entry.diaper ? `<span class="badge badge-diaper">🨲</span>` : '';
       return `<li>
         <span class="recent-time">${fmtTime(entry.time)}</span>
         <span style="display:flex;align-items:center;gap:4px;">
-          <span class="badge ${typeClass[entry.type]}">${typeLabels[entry.type]}</span>
+          <span class="badge ${BATHROOM_BADGE_CLASS[entry.type]}">${BATHROOM_BADGE_LABELS[entry.type]}</span>
           ${diaperBadge}
           <span class="recent-ago">${elapsedStr(entry.time)}</span>
         </span>
       </li>`;
-    }).join('');
+    }, 'No outings recorded today');
   }
 
   // ─── Incident ─────────────────────────────────────────────────────────
+
   function showIncidentModal() {
     document.getElementById('incident-modal').classList.add('show');
   }
@@ -734,13 +790,12 @@
       incidentLog: firebase.firestore.FieldValue.arrayUnion({ time: ts, type })
     }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
-    const typeLabels = { puke: '🤢 Puke', pee: '🚿 Pee', poop: '💩 Poop' };
-    toast(`⚠️ Accident recorded — ${typeLabels[type] || type}`);
+    toast(`⚠️ Accident recorded — ${INCIDENT_EMOJI_LABELS[type] || type}`);
     // onSnapshot fires on this device too and will re-render
   }
 
   function renderIncident() {
-    const days = daysBetween(incidentTs);
+    const days   = daysBetween(incidentTs);
     const daysEl = document.getElementById('incident-days');
     const dateEl = document.getElementById('incident-date');
 
@@ -749,98 +804,96 @@
       dateEl.textContent = 'No accidents recorded';
     } else {
       const lastEntry = incidentLog.find(e => e.time === incidentTs);
-      const typeLabels = { puke: 'Puke', pee: 'Pee', poop: 'Poop' };
-      const typeStr = lastEntry && lastEntry.type ? ` (${typeLabels[lastEntry.type] || lastEntry.type})` : '';
+      const typeStr   = lastEntry && lastEntry.type
+        ? ` (${INCIDENT_TYPE_LABELS[lastEntry.type] || lastEntry.type})`
+        : '';
       daysEl.textContent = days;
       dateEl.textContent = `Last accident: ${fmtTime(incidentTs)}${typeStr}`;
     }
   }
 
   // ─── Food ─────────────────────────────────────────────────────────────
-  function togglePumpkin() {
-    pumpkinOn = !pumpkinOn;
-    const row   = document.getElementById('pumpkin-toggle');
-    const check = document.getElementById('pumpkin-check');
-    row.classList.toggle('active', pumpkinOn);
-    check.textContent = pumpkinOn ? '✓' : '';
-  }
 
   function recordFood(meal) {
     const entry = { time: new Date().toISOString(), meal, pumpkin: pumpkinOn };
-    docRef.set({ foodLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
-    // auto-reset pumpkin after recording
+    docRef.set({ foodLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true })
+      .catch(() => toast('⚠️ Save failed, try again'));
+    // Auto-reset pumpkin toggle after recording
     pumpkinOn = false;
-    document.getElementById('pumpkin-toggle').classList.remove('active');
-    document.getElementById('pumpkin-check').textContent = '';
-    const labels = { breakfast: '🌅 Breakfast', lunch: '☀️ Lunch', dinner: '🌙 Dinner' };
-    toast(`${labels[meal]} recorded!`);
+    applyToggle('pumpkin-toggle', 'pumpkin-check', false);
+    toast(`${MEAL_TOAST_LABELS[meal]} recorded!`);
     // onSnapshot fires on this device too and will re-render
   }
 
   function renderFood() {
-    const today = new Date().toDateString();
-    const todayEntries = foodLog.filter(entry => new Date(entry.time).toDateString() === today).reverse();
-
-    const ul = document.getElementById('food-list');
-    if (todayEntries.length === 0) {
-      ul.innerHTML = '<li><span class="stat-value none">No feedings recorded today</span></li>';
-      return;
-    }
-    const mealLabels = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
-    const mealClass  = { breakfast: 'badge-breakfast', lunch: 'badge-lunch', dinner: 'badge-dinner' };
-    ul.innerHTML = todayEntries.map(entry => {
+    const todayEntries = filterToday(foodLog, e => e.time).reverse();
+    renderList('food-list', todayEntries, entry => {
       const pumpkinBadge = entry.pumpkin ? `<span class="badge badge-pumpkin">🎃</span>` : '';
       return `<li>
         <span class="recent-time">${fmtTime(entry.time)}</span>
         <span style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
-          <span class="badge ${mealClass[entry.meal]}">${mealLabels[entry.meal]}</span>
+          <span class="badge ${MEAL_BADGE_CLASS[entry.meal]}">${MEAL_BADGE_LABELS[entry.meal]}</span>
           ${pumpkinBadge}
           <span class="recent-ago">${elapsedStr(entry.time)}</span>
         </span>
       </li>`;
-    }).join('');
+    }, 'No feedings recorded today');
   }
 
   // ─── Export ───────────────────────────────────────────────────────────
+
+  // Gather all log entries that fall within the cutoff window, across every category,
+  // and return them as a sorted array of { iso, row } objects ready for CSV serialisation.
+  // cutoff is a Unix-ms timestamp; pass null to include all time.
+  function buildExportEntries(cutoff) {
+    const inRange = iso => cutoff === null || new Date(iso).getTime() >= cutoff;
+    const entries = [];
+
+    waterLog.filter(inRange).forEach(ts =>
+      entries.push({ iso: ts, row: [fmtDate(ts), fmtTimeOnly(ts), 'Water', '', ''] })
+    );
+
+    bathroomLog.filter(e => inRange(e.time)).forEach(e =>
+      entries.push({ iso: e.time, row: [fmtDate(e.time), fmtTimeOnly(e.time), 'Bathroom', BATHROOM_EXPORT_LABELS[e.type] || e.type, e.diaper ? 'Diaper' : ''] })
+    );
+
+    foodLog.filter(e => inRange(e.time)).forEach(e =>
+      entries.push({ iso: e.time, row: [fmtDate(e.time), fmtTimeOnly(e.time), 'Feeding', MEAL_BADGE_LABELS[e.meal] || e.meal, e.pumpkin ? 'Pumpkin' : ''] })
+    );
+
+    incidentLog.filter(e => inRange(e.time)).forEach(e =>
+      entries.push({ iso: e.time, row: [fmtDate(e.time), fmtTimeOnly(e.time), 'Incident', INCIDENT_TYPE_LABELS[e.type] || e.type || '', ''] })
+    );
+
+    entries.sort((a, b) => new Date(a.iso) - new Date(b.iso));
+    return entries;
+  }
+
+  // Trigger a browser download of a CSV string with a timestamped filename
+  function downloadCSV(csv, label) {
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `kenobi-tracker_${label}_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // Export all events in the given window to a CSV file.
+  // days=null exports all time; days=30 exports the last 30 days (inclusive of today).
   function exportCSV(days) {
-    // cutoff = start of (today - days + 1) so "30 days" includes today through 29 days ago
+    // Cutoff = start of (today - days + 1) so "30 days" includes today through 29 days ago
     let cutoff = null;
     if (days !== null) {
       const now = new Date();
       cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days + 1).getTime();
     }
 
-    const inRange = iso => cutoff === null || new Date(iso).getTime() >= cutoff;
-    const fmtD    = iso => new Date(iso).toLocaleDateString();
-    const fmtT    = iso => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    const entries = []; // { iso, row }
-
-    waterLog.filter(inRange).forEach(ts =>
-      entries.push({ iso: ts, row: [fmtD(ts), fmtT(ts), 'Water', '', ''] })
-    );
-
-    const typeLabels = { piss: 'Pee', poop: 'Poop', both: 'Both' };
-    bathroomLog.filter(e => inRange(e.time)).forEach(e =>
-      entries.push({ iso: e.time, row: [fmtD(e.time), fmtT(e.time), 'Bathroom', typeLabels[e.type] || e.type, e.diaper ? 'Diaper' : ''] })
-    );
-
-    const mealLabels = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
-    foodLog.filter(e => inRange(e.time)).forEach(e =>
-      entries.push({ iso: e.time, row: [fmtD(e.time), fmtT(e.time), 'Feeding', mealLabels[e.meal] || e.meal, e.pumpkin ? 'Pumpkin' : ''] })
-    );
-
-    const incidentTypeLabels = { puke: 'Puke', pee: 'Pee', poop: 'Poop' };
-    incidentLog.filter(e => inRange(e.time)).forEach(e =>
-      entries.push({ iso: e.time, row: [fmtD(e.time), fmtT(e.time), 'Incident', incidentTypeLabels[e.type] || e.type || '', ''] })
-    );
-
-    if (entries.length === 0) {
-      toast('No data in selected range');
-      return;
-    }
-
-    entries.sort((a, b) => new Date(a.iso) - new Date(b.iso));
+    const entries = buildExportEntries(cutoff);
+    if (entries.length === 0) { toast('No data in selected range'); return; }
 
     const header = ['Date', 'Time', 'Category', 'Detail', 'Note'];
     const esc    = v => '"' + String(v).replace(/"/g, '""') + '"';
@@ -848,27 +901,21 @@
       .map(r => r.map(esc).join(','))
       .join('\r\n');
 
-    const blob  = new Blob([csv], { type: 'text/csv' });
-    const url   = URL.createObjectURL(blob);
-    const a     = document.createElement('a');
     const label = days === null ? 'all-time' : `${days}-days`;
-    a.href     = url;
-    a.download = `kenobi-tracker_${label}_${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadCSV(csv, label);
     toast('📤 Export ready!');
   }
 
   // ─── Sharing ─────────────────────────────────────────────────────────
+
   function copyLink() {
     navigator.clipboard.writeText(location.href)
       .then(() => toast('🔗 Link copied! Send to family member.'))
       .catch(() => toast('Copy this URL: ' + location.href));
   }
 
-  // ─── Live clock for elapsed times ─────────────────────────────────────────────
+  // ─── Live clock ───────────────────────────────────────────────────────
+  // Re-renders all cards every 30 seconds so elapsed-time strings ("14m ago") stay current
   function tick() {
     renderWater();
     renderBathroom();
@@ -877,15 +924,17 @@
   }
 
   // ─── Init ─────────────────────────────────────────────────────────────
-  tick();                      // render from localStorage immediately (fast first paint)
-  setInterval(tick, 30000);    // keep ticking for elapsed-time display ("14m ago" etc.)
+  tick();                      // Render from localStorage immediately (fast first paint)
+  setInterval(tick, 30000);    // Keep ticking so elapsed-time strings stay current
 
-  // Sign in anonymously (invisible to user) so Firestore security rules are satisfied,
-  // then attach a real-time listener that keeps all devices in sync.
+  // Sign in anonymously so Firestore security rules are satisfied, then attach a
+  // real-time listener that syncs state across all devices sharing this session URL.
   auth.signInAnonymously().catch(() => toast('⚠️ Could not connect to sync service')).then(() => {
     docRef.onSnapshot(snap => {
       if (!snap.exists) return;
       const data = snap.data();
+
+      // Pull the latest state from Firestore into local variables
       waterLog    = data.waterLog    || [];
       bathroomLog = data.bathroomLog || [];
       incidentTs  = data.incidentTs  || null;
@@ -899,13 +948,14 @@
         docRef.set({ incidentLog }, { merge: true });
       }
 
-      // Mirror to localStorage as offline cache
+      // Mirror to localStorage as an offline cache for the next page load
       save('waterLog',    waterLog);
       save('bathroomLog', bathroomLog);
       save('incidentTs',  incidentTs);
       save('incidentLog', incidentLog);
       save('foodLog',     foodLog);
-      tick(); // re-render all cards with latest data from any device
+
+      tick(); // Re-render all cards with the latest data from any device
     });
   });
 </script>
