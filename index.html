@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kenobi Habit Tracker</title>
+  <title>Dog Tracker</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -16,48 +16,136 @@
       padding: 10px;
     }
 
-    h1 {
+    /* ── AUTH SCREENS ─────────────────────────────────────────────── */
+    .screen { display: none; min-height: 100vh; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+    .screen.active { display: flex; }
+
+    .auth-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 32px 24px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
       text-align: center;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #2d3748;
-      margin-bottom: 8px;
-      letter-spacing: -0.5px;
     }
+    .auth-card h2 { font-size: 1.6rem; font-weight: 800; color: #2d3748; margin-bottom: 8px; }
+    .auth-card p  { color: #718096; font-size: 0.95rem; margin-bottom: 24px; line-height: 1.5; }
 
-    h1 span { color: #e53e3e; }
+    .auth-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-bottom: 10px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .auth-input:focus { border-color: #3182ce; }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    .btn-google {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       gap: 10px;
-      max-width: 960px;
+      width: 100%;
+      padding: 14px 20px;
+      background: #fff;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #2d3748;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: background 0.1s, box-shadow 0.1s;
+    }
+    .btn-google:hover  { background: #f7fafc; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+    .btn-google:active { transform: scale(0.98); }
+
+    .auth-claim-section {
+      text-align: left;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 16px;
+    }
+    .auth-claim-section summary {
+      font-size: 0.85rem;
+      color: #718096;
+      cursor: pointer;
+      list-style: none;
+    }
+    .auth-claim-section summary::-webkit-details-marker { display: none; }
+    .auth-claim-section[open] summary { margin-bottom: 12px; }
+    .auth-claim-section p { font-size: 0.8rem; color: #718096; margin-bottom: 8px; line-height: 1.4; }
+
+    /* SPINNER */
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #3182ce;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
       margin: 0 auto;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    }
-
-    .card.full-width {
-      grid-column: 1 / -1;
-    }
-
-    .card-title {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 8px;
+    /* FAMILY PICKER */
+    .family-btn {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 10px;
+      width: 100%;
+      padding: 14px 16px;
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #2d3748;
+      cursor: pointer;
+      margin-bottom: 8px;
+      text-align: left;
+      transition: border-color 0.1s, background 0.1s;
     }
+    .family-btn:hover { border-color: #3182ce; background: #ebf8ff; }
 
+    /* ── TRACKER HEADER ───────────────────────────────────────────── */
+    h1 { text-align: center; font-size: 1.4rem; font-weight: 700; color: #2d3748; letter-spacing: -0.5px; }
+    h1 span { color: #e53e3e; }
+
+    .app-header {
+      position: relative;
+      max-width: 960px;
+      margin: 0 auto 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-settings {
+      position: absolute;
+      right: 0;
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+      color: #718096;
+      transition: background 0.1s;
+    }
+    .btn-settings:hover { background: #e2e8f0; }
+
+    /* ── GRID & CARDS ─────────────────────────────────────────────── */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 960px; margin: 0 auto; }
+    .card { background: #fff; border-radius: 14px; padding: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .card.full-width { grid-column: 1 / -1; }
+    .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .icon { font-size: 1.1rem; }
 
-    /* BIG ACTION BUTTONS */
+    /* BUTTONS */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -68,225 +156,80 @@
       font-size: 0.95rem;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.1s, box-shadow 0.1s, opacity 0.1s;
+      transition: transform 0.1s, box-shadow 0.1s;
       padding: 10px 14px;
       width: 100%;
       margin-bottom: 5px;
       line-height: 1.2;
     }
-
     .btn:active { transform: scale(0.97); box-shadow: none !important; }
 
-    .btn-water {
-      background: #3182ce;
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(49,130,206,0.4);
-      font-size: 1rem;
-      padding: 10px 14px;
-    }
-
-    .btn-piss {
-      background: #d69e2e;
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(214,158,46,0.4);
-    }
-
-    .btn-poop {
-      background: #7b5c3a;
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(123,92,58,0.4);
-    }
-
-    .btn-both {
-      background: #9f7aea;
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(159,122,234,0.4);
-    }
-
-    .btn-incident {
-      background: #e53e3e;
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(229,62,62,0.4);
-    }
+    .btn-water    { background: #3182ce; color: #fff; box-shadow: 0 3px 8px rgba(49,130,206,0.4); font-size: 1rem; padding: 10px 14px; }
+    .btn-piss     { background: #d69e2e; color: #fff; box-shadow: 0 3px 8px rgba(214,158,46,0.4); }
+    .btn-poop     { background: #7b5c3a; color: #fff; box-shadow: 0 3px 8px rgba(123,92,58,0.4); }
+    .btn-both     { background: #9f7aea; color: #fff; box-shadow: 0 3px 8px rgba(159,122,234,0.4); }
+    .btn-incident { background: #e53e3e; color: #fff; box-shadow: 0 3px 8px rgba(229,62,62,0.4); }
 
     .btn-sq {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-      padding: 10px;
-      width: 76px;
-      height: 76px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      line-height: 1.2;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; border: none; border-radius: 14px; cursor: pointer;
+      padding: 10px; width: 76px; height: 76px;
+      font-size: 0.72rem; font-weight: 700; line-height: 1.2;
       transition: transform 0.1s, box-shadow 0.1s;
     }
-
     .btn-sq:active { transform: scale(0.97); box-shadow: none !important; }
     .btn-sq .sq-icon { font-size: 1.7rem; line-height: 1; }
 
-    .btn-breakfast {
-      background: #dd6b20;
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(221,107,32,0.4);
-    }
+    .btn-breakfast { background: #dd6b20; color: #fff; box-shadow: 0 3px 8px rgba(221,107,32,0.4); }
+    .btn-lunch     { background: #38a169; color: #fff; box-shadow: 0 3px 8px rgba(56,161,105,0.4); }
+    .btn-dinner    { background: #6b46c1; color: #fff; box-shadow: 0 3px 8px rgba(107,70,193,0.4); }
 
-    .btn-lunch {
-      background: #38a169;
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(56,161,105,0.4);
-    }
-
-    .btn-dinner {
-      background: #6b46c1;
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(107,70,193,0.4);
-    }
-
-    /* DIAPER TOGGLE */
+    /* DIAPER/PUMPKIN TOGGLE */
     .diaper-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #f7fafc;
-      border-radius: 10px;
-      padding: 8px 10px;
-      margin-bottom: 5px;
-      border: 2px solid #e2e8f0;
-      cursor: pointer;
-      user-select: none;
+      display: flex; align-items: center; gap: 8px;
+      background: #f7fafc; border-radius: 10px; padding: 8px 10px; margin-bottom: 5px;
+      border: 2px solid #e2e8f0; cursor: pointer; user-select: none;
     }
-
-    .diaper-row.active {
-      border-color: #48bb78;
-      background: #f0fff4;
-    }
-
+    .diaper-row.active { border-color: #48bb78; background: #f0fff4; }
     .diaper-check {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      border: 2px solid #cbd5e0;
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.15s;
+      width: 24px; height: 24px; border-radius: 6px; border: 2px solid #cbd5e0;
+      background: #fff; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.15s;
     }
-
-    .diaper-row.active .diaper-check {
-      background: #48bb78;
-      border-color: #48bb78;
-      color: #fff;
-    }
-
+    .diaper-row.active .diaper-check { background: #48bb78; border-color: #48bb78; color: #fff; }
     .diaper-label { font-weight: 600; font-size: 0.95rem; color: #4a5568; }
     .diaper-row.active .diaper-label { color: #276749; }
 
     /* STATS */
-    .stat-block {
-      background: #f7fafc;
-      border-radius: 8px;
-      padding: 7px 10px;
-      margin-bottom: 6px;
-    }
-
-    .stat-label {
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #a0aec0;
-      margin-bottom: 2px;
-    }
-
-    .stat-value {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #2d3748;
-    }
-
-    .stat-value.big {
-      font-size: 1.6rem;
-      color: #3182ce;
-    }
-
-    .stat-value.elapsed {
-      font-size: 1.2rem;
-      color: #e53e3e;
-    }
-
-    .stat-value.none { color: #a0aec0; font-weight: 400; font-style: italic; }
+    .stat-block   { background: #f7fafc; border-radius: 8px; padding: 7px 10px; margin-bottom: 6px; }
+    .stat-label   { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #a0aec0; margin-bottom: 2px; }
+    .stat-value   { font-size: 1rem; font-weight: 700; color: #2d3748; }
+    .stat-value.big     { font-size: 1.6rem; color: #3182ce; }
+    .stat-value.elapsed { font-size: 1.2rem; color: #e53e3e; }
+    .stat-value.none    { color: #a0aec0; font-weight: 400; font-style: italic; }
 
     /* RECENT LIST */
     .recent-list { list-style: none; }
-
-    .recent-list li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 0;
-      border-bottom: 1px solid #edf2f7;
-      font-size: 0.85rem;
-    }
-
+    .recent-list li { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #edf2f7; font-size: 0.85rem; }
     .recent-list li:last-child { border-bottom: none; }
-
     .recent-time { font-weight: 600; color: #2d3748; }
-    .recent-ago { color: #a0aec0; font-size: 0.8rem; }
+    .recent-ago  { color: #a0aec0; font-size: 0.8rem; }
 
-    .badge {
-      display: inline-block;
-      padding: 3px 9px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-
-    .badge-piss { background: #fefcbf; color: #744210; }
-    .badge-poop { background: #feebc8; color: #7b341e; }
-    .badge-both { background: #e9d8fd; color: #553c9a; }
-    .badge-diaper { background: #bee3f8; color: #2a4365; margin-left: 4px; }
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+    .badge-piss      { background: #fefcbf; color: #744210; }
+    .badge-poop      { background: #feebc8; color: #7b341e; }
+    .badge-both      { background: #e9d8fd; color: #553c9a; }
+    .badge-diaper    { background: #bee3f8; color: #2a4365; margin-left: 4px; }
     .badge-breakfast { background: #feebc8; color: #7b341e; }
-    .badge-lunch { background: #c6f6d5; color: #22543d; }
-    .badge-dinner { background: #e9d8fd; color: #44337a; }
-    .badge-pumpkin { background: #fbd38d; color: #7b341e; }
+    .badge-lunch     { background: #c6f6d5; color: #22543d; }
+    .badge-dinner    { background: #e9d8fd; color: #44337a; }
+    .badge-pumpkin   { background: #fbd38d; color: #7b341e; }
 
     /* INCIDENT */
-    .incident-big {
-      text-align: center;
-      padding: 10px;
-      background: #fff5f5;
-      border-radius: 10px;
-      margin-bottom: 6px;
-      border: 2px solid #fed7d7;
-    }
-
-    .incident-days {
-      font-size: 2.2rem;
-      font-weight: 800;
-      color: #e53e3e;
-      line-height: 1;
-    }
-
-    .incident-days-label {
-      font-size: 0.8rem;
-      color: #718096;
-      margin-top: 2px;
-    }
-
-    .incident-date {
-      font-size: 0.85rem;
-      color: #718096;
-      text-align: center;
-      margin-bottom: 8px;
-    }
+    .incident-big        { text-align: center; padding: 10px; background: #fff5f5; border-radius: 10px; margin-bottom: 6px; border: 2px solid #fed7d7; }
+    .incident-days       { font-size: 2.2rem; font-weight: 800; color: #e53e3e; line-height: 1; }
+    .incident-days-label { font-size: 0.8rem; color: #718096; margin-top: 2px; }
+    .incident-date       { font-size: 0.85rem; color: #718096; text-align: center; margin-bottom: 8px; }
 
     /* RESPONSIVE */
     @media (max-width: 600px) {
@@ -298,252 +241,293 @@
 
     /* TOAST */
     #toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
+      position: fixed; bottom: 24px; left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: #2d3748;
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: 40px;
-      font-size: 0.9rem;
-      font-weight: 600;
+      background: #2d3748; color: #fff;
+      padding: 12px 24px; border-radius: 40px;
+      font-size: 0.9rem; font-weight: 600;
       box-shadow: 0 4px 16px rgba(0,0,0,0.25);
       transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      z-index: 1000;
-      white-space: nowrap;
+      z-index: 1000; white-space: nowrap;
     }
-
     #toast.show { transform: translateX(-50%) translateY(0); }
 
     /* EXPORT */
-    .export-section {
-      max-width: 960px;
-      margin: 10px auto 20px;
-    }
-
-    .btn-export {
-      background: #4a5568;
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(74,85,104,0.3);
-      font-size: 0.85rem;
-    }
-
+    .export-section { max-width: 960px; margin: 10px auto 20px; }
+    .btn-export { background: #4a5568; color: #fff; box-shadow: 0 3px 8px rgba(74,85,104,0.3); font-size: 0.85rem; }
     .btn-export:hover { background: #2d3748; }
 
-    /* INCIDENT TYPE MODAL */
+    /* MODALS */
     .modal-overlay {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      opacity: 0;
-      pointer-events: none;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2000; opacity: 0; pointer-events: none;
       transition: opacity 0.2s;
     }
-
-    .modal-overlay.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
+    .modal-overlay.show { opacity: 1; pointer-events: auto; }
     .modal-box {
-      background: #fff;
-      border-radius: 18px;
-      padding: 24px 20px;
-      max-width: 320px;
-      width: 90%;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-      text-align: center;
+      background: #fff; border-radius: 18px; padding: 24px 20px;
+      max-width: 320px; width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2); text-align: center;
     }
+    .modal-title { font-size: 1.1rem; font-weight: 700; color: #2d3748; margin-bottom: 16px; }
+    .btn-puke   { background: #48bb78; color: #fff; box-shadow: 0 3px 8px rgba(72,187,120,0.4); }
+    .btn-cancel { margin-top: 14px; background: none; border: none; color: #a0aec0; font-size: 0.85rem; cursor: pointer; }
 
-    .modal-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #2d3748;
-      margin-bottom: 16px;
-    }
+    /* SETTINGS MODAL */
+    .settings-box { max-width: 400px; text-align: left; max-height: 85vh; overflow-y: auto; }
+    .settings-section { margin-bottom: 20px; }
+    .settings-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #a0aec0; margin-bottom: 8px; }
+    .settings-input { width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; outline: none; transition: border-color 0.15s; }
+    .settings-input:focus { border-color: #3182ce; }
+    .settings-row { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-sm { padding: 8px 14px; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .btn-primary { background: #3182ce; color: #fff; }
+    .btn-primary:hover { background: #2c5282; }
+    .btn-danger { background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; }
+    .btn-danger:hover { background: #fed7d7; }
 
-    .btn-puke {
-      background: #48bb78;
-      color: #fff;
-      box-shadow: 0 3px 8px rgba(72,187,120,0.4);
-    }
+    .member-list { list-style: none; }
+    .member-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edf2f7; font-size: 0.9rem; }
+    .member-item:last-child { border-bottom: none; }
+    .member-you { font-size: 0.75rem; color: #a0aec0; margin-left: 6px; }
 
-    .btn-cancel {
-      margin-top: 14px;
-      background: none;
-      border: none;
-      color: #a0aec0;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-
+    .settings-footer { border-top: 1px solid #edf2f7; margin-top: 16px; padding-top: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .btn-signout { background: none; border: none; color: #a0aec0; font-size: 0.85rem; cursor: pointer; }
+    .btn-signout:hover { color: #e53e3e; }
   </style>
 </head>
 <body>
 
-<h1>🐾 Kenobi Tracker <span>&#9829;</span></h1>
+<!-- ═══ LOADING ═════════════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-loading">
+  <div style="text-align:center;">
+    <div class="spinner"></div>
+    <div style="color:#718096; margin-top:16px; font-size:0.9rem; font-weight:600;">Loading…</div>
+  </div>
+</div>
 
-<div class="grid">
-
-  <!-- WATER CARD -->
-  <div class="card">
-    <div class="card-title"><span class="icon">💧</span> Water</div>
-
-    <div style="display:flex; gap:6px; margin-bottom:6px;">
-      <div class="stat-block" style="flex:1; text-align:center;">
-        <div class="stat-label">Today</div>
-        <div class="stat-value big" id="water-count">0</div>
-        <div style="font-size:0.75rem;color:#a0aec0;">waterings</div>
-      </div>
-      <div class="stat-block" style="flex:2;">
-        <div class="stat-label">Time Since Last</div>
-        <div class="stat-value elapsed" id="water-elapsed">—</div>
-      </div>
-    </div>
-
-    <div class="stat-block" style="margin-bottom:6px;">
-      <div class="stat-label">Today's Waterings</div>
-      <ul class="recent-list" id="water-list">
-        <li><span class="stat-value none">No waterings recorded today</span></li>
-      </ul>
-    </div>
-
-    <button class="btn btn-water" onclick="giveWater()">
-      💧 Give Water Now
+<!-- ═══ LOGIN ════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-login">
+  <div class="auth-card">
+    <div style="font-size:3rem; margin-bottom:8px;">🐾</div>
+    <h2>Dog Tracker</h2>
+    <p>Track your dog's daily habits — shared in real time with your family.</p>
+    <button class="btn-google" onclick="signInWithGoogle()">
+      <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Sign in with Google
     </button>
   </div>
+</div>
 
-  <!-- BATHROOM CARD -->
-  <div class="card">
-    <div class="card-title"><span class="icon">🚶</span> Bathroom</div>
-
-    <div style="display:flex; gap:6px; margin-bottom:6px;">
-      <div class="stat-block" style="flex:1; text-align:center;">
-        <div class="stat-label">Walks Today</div>
-        <div class="stat-value big" id="walk-count">0</div>
-        <div style="font-size:0.75rem;color:#a0aec0;">walks</div>
-      </div>
-      <div class="stat-block" style="flex:2;">
-        <div class="stat-label">Time Since Last Walk</div>
-        <div class="stat-value elapsed" id="walk-elapsed">—</div>
-      </div>
-    </div>
-
-    <div class="stat-block" style="margin-bottom:6px;">
-      <div class="stat-label">Today's Outings</div>
-      <ul class="recent-list" id="bathroom-list">
-        <li><span class="stat-value none">No outings recorded today</span></li>
-      </ul>
-    </div>
-
-    <button class="btn btn-piss" onclick="recordBathroom('piss')">
-      📛 Pee Pee Time
+<!-- ═══ NO FAMILY ════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-no-family">
+  <div class="auth-card">
+    <div style="font-size:2.5rem; margin-bottom:8px;">🐕</div>
+    <h2>Welcome!</h2>
+    <p>Create a family to start tracking your dog's habits.</p>
+    <input class="auth-input" id="nf-dog-name" type="text" placeholder="Your dog's name (e.g. Kenobi)" maxlength="40" />
+    <button class="btn btn-water" style="font-size:1rem; margin-bottom:0;" onclick="handleCreateFamily()">
+      🐾 Create Family
     </button>
-    <button class="btn btn-poop" onclick="recordBathroom('poop')">
-      💩 Poo Poo Time
-    </button>
-    <button class="btn btn-both" onclick="recordBathroom('both')">
-      ✨ All Poo Poo Time is Pee Pee Time
-    </button>
+    <details class="auth-claim-section" id="claim-details">
+      <summary>📂 Have existing data? Claim it here</summary>
+      <p>Paste your old session URL or ID to import your existing tracking history.</p>
+      <input class="auth-input" id="nf-claim-uuid" type="text" placeholder="Session URL or ID" style="margin-bottom:8px;" />
+      <button class="btn" style="background:#718096; color:#fff; font-size:0.9rem; margin-bottom:0;" onclick="handleClaimSession()">
+        Import Existing Data
+      </button>
+    </details>
+  </div>
+</div>
 
-    <div class="diaper-row" id="diaper-toggle" onclick="toggleDiaper()">
-      <div class="diaper-check" id="diaper-check"></div>
-      <div>
-        <div class="diaper-label">Diaper Used</div>
-        <div style="font-size:0.75rem;color:#718096;">Toggle before recording</div>
-      </div>
-    </div>
+<!-- ═══ PICK FAMILY ══════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-pick-family">
+  <div class="auth-card">
+    <div style="font-size:2.5rem; margin-bottom:8px;">🐾</div>
+    <h2>Your Dogs</h2>
+    <p>Select a family to open their tracker.</p>
+    <div id="family-list"></div>
+  </div>
+</div>
+
+<!-- ═══ TRACKER APP ══════════════════════════════════════════════════════ -->
+<div id="app" style="display:none;">
+
+  <div class="app-header">
+    <h1>🐾 <span id="dog-name-heading">Dog</span> Tracker <span>&#9829;</span></h1>
+    <button class="btn-settings" onclick="openSettings()" title="Family settings">⚙️</button>
   </div>
 
-  <!-- FOOD CARD -->
-  <div class="card full-width">
-    <div class="card-title"><span class="icon">🍽️</span> Feeding</div>
+  <div class="grid">
 
-    <div class="food-cols" style="display:flex; gap:10px; align-items:stretch;">
-      <div style="flex:1; min-width:0;">
-        <div class="stat-block" style="margin-bottom:0; height:100%;">
-          <div class="stat-label">Today's Feedings</div>
-          <ul class="recent-list" id="food-list">
-            <li><span class="stat-value none">No feedings recorded today</span></li>
-          </ul>
+    <!-- WATER CARD -->
+    <div class="card">
+      <div class="card-title"><span class="icon">💧</span> Water</div>
+      <div style="display:flex; gap:6px; margin-bottom:6px;">
+        <div class="stat-block" style="flex:1; text-align:center;">
+          <div class="stat-label">Today</div>
+          <div class="stat-value big" id="water-count">0</div>
+          <div style="font-size:0.75rem;color:#a0aec0;">waterings</div>
+        </div>
+        <div class="stat-block" style="flex:2;">
+          <div class="stat-label">Time Since Last</div>
+          <div class="stat-value elapsed" id="water-elapsed">—</div>
         </div>
       </div>
-      <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:5px;">
-        <div style="display:flex; gap:5px;">
-          <button class="btn btn-breakfast" onclick="recordFood('breakfast')" style="margin-bottom:0;">
-            🌅 Breakfast
-          </button>
-          <button class="btn btn-lunch" onclick="recordFood('lunch')" style="margin-bottom:0;">
-            ☀️ Lunch
-          </button>
-          <button class="btn btn-dinner" onclick="recordFood('dinner')" style="margin-bottom:0;">
-            🌙 Dinner
-          </button>
+      <div class="stat-block" style="margin-bottom:6px;">
+        <div class="stat-label">Today's Waterings</div>
+        <ul class="recent-list" id="water-list">
+          <li><span class="stat-value none">No waterings recorded today</span></li>
+        </ul>
+      </div>
+      <button class="btn btn-water" onclick="giveWater()">💧 Give Water Now</button>
+    </div>
+
+    <!-- BATHROOM CARD -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🚶</span> Bathroom</div>
+      <div style="display:flex; gap:6px; margin-bottom:6px;">
+        <div class="stat-block" style="flex:1; text-align:center;">
+          <div class="stat-label">Walks Today</div>
+          <div class="stat-value big" id="walk-count">0</div>
+          <div style="font-size:0.75rem;color:#a0aec0;">walks</div>
         </div>
-        <div class="diaper-row" id="pumpkin-toggle" onclick="togglePumpkin()" style="margin-bottom:0;">
-          <div class="diaper-check" id="pumpkin-check"></div>
-          <div>
-            <div class="diaper-label">Add Pumpkin</div>
-            <div style="font-size:0.75rem;color:#718096;">Toggle for wet food + pumpkin</div>
+        <div class="stat-block" style="flex:2;">
+          <div class="stat-label">Time Since Last Walk</div>
+          <div class="stat-value elapsed" id="walk-elapsed">—</div>
+        </div>
+      </div>
+      <div class="stat-block" style="margin-bottom:6px;">
+        <div class="stat-label">Today's Outings</div>
+        <ul class="recent-list" id="bathroom-list">
+          <li><span class="stat-value none">No outings recorded today</span></li>
+        </ul>
+      </div>
+      <button class="btn btn-piss" onclick="recordBathroom('piss')">📛 Pee Pee Time</button>
+      <button class="btn btn-poop" onclick="recordBathroom('poop')">💩 Poo Poo Time</button>
+      <button class="btn btn-both" onclick="recordBathroom('both')">✨ All Poo Poo Time is Pee Pee Time</button>
+      <div class="diaper-row" id="diaper-toggle" onclick="toggleDiaper()">
+        <div class="diaper-check" id="diaper-check"></div>
+        <div>
+          <div class="diaper-label">Diaper Used</div>
+          <div style="font-size:0.75rem;color:#718096;">Toggle before recording</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOD CARD -->
+    <div class="card full-width">
+      <div class="card-title"><span class="icon">🍽️</span> Feeding</div>
+      <div class="food-cols" style="display:flex; gap:10px; align-items:stretch;">
+        <div style="flex:1; min-width:0;">
+          <div class="stat-block" style="margin-bottom:0; height:100%;">
+            <div class="stat-label">Today's Feedings</div>
+            <ul class="recent-list" id="food-list">
+              <li><span class="stat-value none">No feedings recorded today</span></li>
+            </ul>
+          </div>
+        </div>
+        <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:5px;">
+          <div style="display:flex; gap:5px;">
+            <button class="btn btn-breakfast" onclick="recordFood('breakfast')" style="margin-bottom:0;">🌅 Breakfast</button>
+            <button class="btn btn-lunch"     onclick="recordFood('lunch')"     style="margin-bottom:0;">☀️ Lunch</button>
+            <button class="btn btn-dinner"    onclick="recordFood('dinner')"    style="margin-bottom:0;">🌙 Dinner</button>
+          </div>
+          <div class="diaper-row" id="pumpkin-toggle" onclick="togglePumpkin()" style="margin-bottom:0;">
+            <div class="diaper-check" id="pumpkin-check"></div>
+            <div>
+              <div class="diaper-label">Add Pumpkin</div>
+              <div style="font-size:0.75rem;color:#718096;">Toggle for wet food + pumpkin</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- INCIDENT CARD -->
-  <div class="card full-width">
-    <div class="card-title"><span class="icon">⚠️</span> Accident / Incident</div>
-
-    <div style="display:flex; gap:10px; align-items:center;">
-      <div class="incident-big" style="flex:1; margin-bottom:0;">
-        <div class="incident-days" id="incident-days">—</div>
-        <div class="incident-days-label">days since last accident</div>
-        <div class="incident-date" id="incident-date" style="margin-bottom:0;">No accidents recorded</div>
+    <!-- INCIDENT CARD -->
+    <div class="card full-width">
+      <div class="card-title"><span class="icon">⚠️</span> Accident / Incident</div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <div class="incident-big" style="flex:1; margin-bottom:0;">
+          <div class="incident-days" id="incident-days">—</div>
+          <div class="incident-days-label">days since last accident</div>
+          <div class="incident-date" id="incident-date" style="margin-bottom:0;">No accidents recorded</div>
+        </div>
+        <button class="btn-sq btn-incident" onclick="showIncidentModal()">
+          <span class="sq-icon">⚠️</span>
+          <span>Whoops</span>
+        </button>
       </div>
-      <button class="btn-sq btn-incident" onclick="showIncidentModal()">
-        <span class="sq-icon">⚠️</span>
-        <span>Whoops</span>
-      </button>
+    </div>
+
+  </div><!-- /.grid -->
+
+  <!-- EXPORT SECTION -->
+  <div class="export-section">
+    <div class="card">
+      <div class="card-title"><span class="icon">📤</span> Export Data</div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn btn-export" onclick="exportCSV(30)">Last 30 Days</button>
+        <button class="btn btn-export" onclick="exportCSV(90)">Last 90 Days</button>
+        <button class="btn btn-export" onclick="exportCSV(null)">All Time</button>
+      </div>
     </div>
   </div>
 
-</div>
+</div><!-- /#app -->
 
-<!-- EXPORT SECTION -->
-<div class="export-section">
-  <div class="card">
-    <div class="card-title"><span class="icon">📤</span> Export Data</div>
-    <div style="display:flex; gap:6px;">
-      <button class="btn btn-export" onclick="exportCSV(30)">Last 30 Days</button>
-      <button class="btn btn-export" onclick="exportCSV(90)">Last 90 Days</button>
-      <button class="btn btn-export" onclick="exportCSV(null)">All Time</button>
-    </div>
-  </div>
-</div>
-
-<!-- SHARING -->
-<div style="text-align:center; margin-top:12px; margin-bottom:4px;">
-  <button onclick="copyLink()" style="background:none;border:1px solid #cbd5e0;border-radius:8px;padding:6px 14px;font-size:0.8rem;color:#4a5568;cursor:pointer;">
-    🔗 Copy Sharing Link
-  </button>
-</div>
-
-<!-- INCIDENT TYPE MODAL -->
+<!-- ═══ INCIDENT TYPE MODAL ══════════════════════════════════════════════ -->
 <div class="modal-overlay" id="incident-modal" onclick="if(event.target===this)closeIncidentModal()">
   <div class="modal-box">
     <div class="modal-title">⚠️ What happened?</div>
     <div style="display:flex; gap:8px;">
       <button class="btn btn-puke" onclick="recordIncident('puke')" style="margin-bottom:0;">🤢 Puke</button>
-      <button class="btn btn-piss" onclick="recordIncident('pee')" style="margin-bottom:0;">💛 Pee</button>
+      <button class="btn btn-piss" onclick="recordIncident('pee')"  style="margin-bottom:0;">💛 Pee</button>
       <button class="btn btn-poop" onclick="recordIncident('poop')" style="margin-bottom:0;">💩 Poop</button>
     </div>
     <button class="btn-cancel" onclick="closeIncidentModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS MODAL ═══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="settings-modal" onclick="if(event.target===this)closeSettings()">
+  <div class="modal-box settings-box">
+    <div class="modal-title" style="text-align:left; margin-bottom:20px;">⚙️ Family Settings</div>
+
+    <!-- Dog name -->
+    <div class="settings-section">
+      <div class="settings-label">Dog's Name</div>
+      <div class="settings-row">
+        <input class="settings-input" id="settings-dog-name" type="text" maxlength="40" placeholder="Dog's name" />
+        <button class="btn-sm btn-primary" onclick="saveDogName()">Save</button>
+      </div>
+    </div>
+
+    <!-- Members -->
+    <div class="settings-section">
+      <div class="settings-label">Family Members</div>
+      <ul class="member-list" id="settings-member-list"></ul>
+      <div class="settings-row" style="margin-top:10px;">
+        <input class="settings-input" id="invite-email-input" type="email" placeholder="Email address to invite" />
+        <button class="btn-sm btn-primary" onclick="inviteMember()">Invite</button>
+      </div>
+      <div style="font-size:0.75rem; color:#a0aec0; margin-top:6px; line-height:1.4;">
+        Must match their Google account email address.
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="settings-footer">
+      <button class="btn-sm btn-danger" id="btn-switch-dog" onclick="switchDog()" style="display:none;">Switch Dog</button>
+      <button class="btn-signout" onclick="signOutUser()">Sign out</button>
+    </div>
   </div>
 </div>
 
@@ -553,50 +537,389 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-  // ─── Firebase init ─────────────────────────────────────────────
+  // ─── Firebase init ────────────────────────────────────────────────────
   firebase.initializeApp({
-    apiKey: "AIzaSyAjf5_FXec1K3e56QgBeENn4P3jblJX2Ys",
-    authDomain: "dog-tracker-294ea.firebaseapp.com",
-    projectId: "dog-tracker-294ea",
-    storageBucket: "dog-tracker-294ea.firebasestorage.app",
+    apiKey:            "AIzaSyAjf5_FXec1K3e56QgBeENn4P3jblJX2Ys",
+    authDomain:        "dog-tracker-294ea.firebaseapp.com",
+    projectId:         "dog-tracker-294ea",
+    storageBucket:     "dog-tracker-294ea.firebasestorage.app",
     messagingSenderId: "368709759023",
-    appId: "1:368709759023:web:255a2e1cff4e90d331d6da"
+    appId:             "1:368709759023:web:255a2e1cff4e90d331d6da"
   });
   const db   = firebase.firestore();
   const auth = firebase.auth();
 
-  // ─── Storage helpers (kept for fast first-paint / offline cache) ───
+  // ─── App state ────────────────────────────────────────────────────────
+  let currentUser      = null;
+  let currentFamilyId  = null;
+  let currentFamilyDoc = null;
+  let dogName          = 'Dog';
+  let docRef           = null;
+  let unsubSnapshot    = null;
+  let tickInterval     = null;
+
+  // ─── Tracker data (seeded from localStorage for fast first-paint) ─────
   const load = key => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
   const save = (key, val) => localStorage.setItem(key, JSON.stringify(val));
 
-  // ─── Session ID — ?session=uuid query param is the shareable room code ───
-  // Using a query parameter instead of a hash fragment because hash fragments
-  // are frequently stripped by iMessage, SMS, and other messaging apps before
-  // the link is opened, causing a fresh UUID to be generated on the second device.
-  function getSessionId() {
-    const params = new URLSearchParams(location.search);
-    let id = params.get('session');
-    if (!id || id.length < 10) id = load('sessionId');
-    if (!id || id.length < 10) { id = crypto.randomUUID(); save('sessionId', id); }
-    if (params.get('session') !== id) {
-      params.set('session', id);
-      history.replaceState(null, '', '?' + params.toString());
-    }
-    return id;
-  }
-  const SESSION_ID = getSessionId();
-  const docRef = db.collection('trackers').doc(SESSION_ID);
-
-  // ─── State (seeded from localStorage for instant first paint) ─────
-  let waterLog    = load('waterLog')    || [];   // array of ISO strings
-  let bathroomLog = load('bathroomLog') || [];   // [{time, type, diaper}]
-  let incidentTs  = load('incidentTs')  || null; // ISO string or null — most recent, drives the UI counter
-  let incidentLog = load('incidentLog') || [];   // [{time}] — full history of every incident reset, for export
-  let foodLog     = load('foodLog')     || [];   // [{time, meal, pumpkin}]
+  let waterLog    = load('waterLog')    || [];
+  let bathroomLog = load('bathroomLog') || [];
+  let incidentTs  = load('incidentTs')  || null;
+  let incidentLog = load('incidentLog') || [];
+  let foodLog     = load('foodLog')     || [];
   let diaperOn    = false;
   let pumpkinOn   = false;
 
-  // ─── Utilities ──────────────────────────────────────────────────
+  // ─── Screen state machine ─────────────────────────────────────────────
+  function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('app').style.display = 'none';
+    if (name === 'tracker') {
+      document.getElementById('app').style.display = '';
+    } else {
+      const el = document.getElementById('screen-' + name);
+      if (el) el.classList.add('active');
+    }
+  }
+
+  // ─── Auth ─────────────────────────────────────────────────────────────
+  function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+      auth.signInWithRedirect(provider);
+    } else {
+      auth.signInWithPopup(provider).catch(err => {
+        if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+          auth.signInWithRedirect(provider);
+        } else {
+          toast('⚠️ Sign-in failed. Please try again.');
+        }
+      });
+    }
+  }
+
+  function signOutUser() {
+    closeSettings();
+    unbindFamily();
+    auth.signOut();
+  }
+
+  // ─── User profile doc ─────────────────────────────────────────────────
+  async function ensureUserDoc(user) {
+    const ref  = db.collection('users').doc(user.uid);
+    const snap = await ref.get();
+    if (!snap.exists) {
+      const data = { email: user.email || '', displayName: user.displayName || '', families: [], activeFamilyId: null };
+      await ref.set(data);
+      return data;
+    }
+    await ref.update({ email: user.email || '', displayName: user.displayName || '' });
+    return snap.data();
+  }
+
+  // ─── Invite processing (runs on every login) ──────────────────────────
+  async function processInvites(user) {
+    if (!user.email) return;
+    const key = user.email.toLowerCase();
+    const inviteRef = db.collection('invites').doc(key);
+    const snap = await inviteRef.get().catch(() => null);
+    if (!snap || !snap.exists) return;
+
+    const { pending } = snap.data();
+    if (!pending || pending.length === 0) return;
+
+    const batch = db.batch();
+    const userRef = db.collection('users').doc(user.uid);
+
+    for (const invite of pending) {
+      const familyRef = db.collection('families').doc(invite.familyId);
+      batch.update(familyRef, {
+        members:       firebase.firestore.FieldValue.arrayUnion(user.uid),
+        memberEmails:  firebase.firestore.FieldValue.arrayUnion(key),
+        memberDetails: firebase.firestore.FieldValue.arrayUnion({ email: key, uid: user.uid })
+      });
+    }
+    batch.update(userRef, {
+      families: firebase.firestore.FieldValue.arrayUnion(...pending.map(i => i.familyId))
+    });
+    batch.delete(inviteRef);
+    await batch.commit().catch(e => console.warn('Invite processing failed:', e));
+  }
+
+  // ─── Prune stale family memberships (lazy cleanup after owner removes) ─
+  async function pruneAndGetFamilies(familyIds) {
+    if (!familyIds.length) return [];
+    const snaps = await Promise.all(
+      familyIds.map(id => db.collection('families').doc(id).get().catch(() => null))
+    );
+    const valid = [], stale = [];
+    snaps.forEach((snap, i) => {
+      const inMembers = snap && snap.exists && (snap.data().members || []).includes(currentUser.uid);
+      (inMembers ? valid : stale).push(familyIds[i]);
+    });
+    if (stale.length) {
+      const userRef = db.collection('users').doc(currentUser.uid);
+      for (const id of stale) {
+        userRef.update({ families: firebase.firestore.FieldValue.arrayRemove(id) }).catch(() => {});
+      }
+    }
+    return valid;
+  }
+
+  // ─── Family creation ──────────────────────────────────────────────────
+  async function createFamily(name, trackerData) {
+    const familyRef  = db.collection('families').doc();
+    const familyId   = familyRef.id;
+    const trackerRef = db.collection('trackers').doc(familyId);
+    const userRef    = db.collection('users').doc(currentUser.uid);
+    const emailKey   = currentUser.email.toLowerCase();
+
+    const batch = db.batch();
+    batch.set(familyRef, {
+      dogName:       name,
+      ownerUid:      currentUser.uid,
+      members:       [currentUser.uid],
+      memberEmails:  [emailKey],
+      memberDetails: [{ email: emailKey, uid: currentUser.uid }],
+      createdAt:     firebase.firestore.FieldValue.serverTimestamp()
+    });
+    batch.set(trackerRef, trackerData || {
+      waterLog: [], bathroomLog: [], incidentTs: null, incidentLog: [], foodLog: []
+    });
+    batch.update(userRef, {
+      families:       firebase.firestore.FieldValue.arrayUnion(familyId),
+      activeFamilyId: familyId
+    });
+    await batch.commit();
+    return familyId;
+  }
+
+  // ─── Session claim: migrate old UUID-based data ───────────────────────
+  async function claimSession(uuid, name) {
+    const oldSnap = await db.collection('trackers').doc(uuid).get().catch(() => null);
+    const trackerData = (oldSnap && oldSnap.exists) ? oldSnap.data() : null;
+    return createFamily(name || 'Kenobi', trackerData);
+  }
+
+  // ─── Bind tracker to a family ─────────────────────────────────────────
+  async function bindFamily(familyId) {
+    unbindFamily();
+    currentFamilyId = familyId;
+    docRef = db.collection('trackers').doc(familyId);
+
+    const familySnap = await db.collection('families').doc(familyId).get();
+    currentFamilyDoc = familySnap.data();
+    dogName = currentFamilyDoc.dogName || 'Dog';
+    updateDogNameUI();
+
+    // Show "Switch Dog" only if user belongs to multiple families
+    const userSnap = await db.collection('users').doc(currentUser.uid).get();
+    const allFamilies = (userSnap.data() || {}).families || [];
+    document.getElementById('btn-switch-dog').style.display = allFamilies.length > 1 ? '' : 'none';
+
+    showScreen('tracker');
+    tick();
+    tickInterval = setInterval(tick, 30000);
+
+    unsubSnapshot = docRef.onSnapshot(snap => {
+      if (!snap.exists) return;
+      const data = snap.data();
+      waterLog    = data.waterLog    || [];
+      bathroomLog = data.bathroomLog || [];
+      incidentTs  = data.incidentTs  || null;
+      incidentLog = data.incidentLog || [];
+      foodLog     = data.foodLog     || [];
+
+      // One-time migration: seed incidentLog from incidentTs if missing
+      if (incidentTs && incidentLog.length === 0) {
+        incidentLog = [{ time: incidentTs }];
+        docRef.set({ incidentLog }, { merge: true });
+      }
+
+      save('waterLog',    waterLog);
+      save('bathroomLog', bathroomLog);
+      save('incidentTs',  incidentTs);
+      save('incidentLog', incidentLog);
+      save('foodLog',     foodLog);
+      tick();
+    });
+  }
+
+  function unbindFamily() {
+    if (unsubSnapshot) { unsubSnapshot(); unsubSnapshot = null; }
+    if (tickInterval)  { clearInterval(tickInterval); tickInterval = null; }
+    docRef = null;
+    currentFamilyId  = null;
+    currentFamilyDoc = null;
+  }
+
+  function updateDogNameUI() {
+    document.getElementById('dog-name-heading').textContent = dogName;
+    document.title = `${dogName} Tracker`;
+  }
+
+  // ─── UI: Create family ────────────────────────────────────────────────
+  async function handleCreateFamily() {
+    const name = document.getElementById('nf-dog-name').value.trim();
+    if (!name) { toast("Please enter your dog's name."); return; }
+    try {
+      const familyId = await createFamily(name);
+      await bindFamily(familyId);
+    } catch (e) {
+      toast('⚠️ Could not create family. Try again.');
+      console.error(e);
+    }
+  }
+
+  // ─── UI: Claim existing session ───────────────────────────────────────
+  async function handleClaimSession() {
+    const raw  = document.getElementById('nf-claim-uuid').value.trim();
+    const name = document.getElementById('nf-dog-name').value.trim() || 'Kenobi';
+    const uuid = extractUUID(raw);
+    if (!uuid) { toast('Please enter a valid session ID or URL.'); return; }
+    try {
+      const familyId = await claimSession(uuid, name);
+      toast('✅ Data imported!');
+      await bindFamily(familyId);
+    } catch (e) {
+      toast('⚠️ Could not import data. Try again.');
+      console.error(e);
+    }
+  }
+
+  function extractUUID(input) {
+    if (!input) return null;
+    try {
+      const url = new URL(input);
+      const s = url.searchParams.get('session');
+      if (s && s.length >= 10) return s;
+    } catch {}
+    return input.length >= 10 ? input : null;
+  }
+
+  // ─── UI: Pick family ──────────────────────────────────────────────────
+  async function showPickFamily(familyIds) {
+    const snaps = await Promise.all(
+      familyIds.map(id => db.collection('families').doc(id).get().catch(() => null))
+    );
+    document.getElementById('family-list').innerHTML = snaps.map((snap, i) => {
+      if (!snap || !snap.exists) return '';
+      const name = snap.data().dogName || 'Dog';
+      return `<button class="family-btn" onclick="selectFamily('${familyIds[i]}')">
+        <span style="font-size:1.5rem;">🐾</span><span>${name}</span>
+      </button>`;
+    }).filter(Boolean).join('');
+    showScreen('pick-family');
+  }
+
+  async function selectFamily(familyId) {
+    await db.collection('users').doc(currentUser.uid).update({ activeFamilyId: familyId }).catch(() => {});
+    await bindFamily(familyId);
+  }
+
+  // ─── Settings panel ───────────────────────────────────────────────────
+  function openSettings() {
+    document.getElementById('settings-dog-name').value = dogName;
+    document.getElementById('invite-email-input').value = '';
+    renderMemberList();
+    document.getElementById('settings-modal').classList.add('show');
+  }
+
+  function closeSettings() {
+    document.getElementById('settings-modal').classList.remove('show');
+  }
+
+  async function saveDogName() {
+    const newName = document.getElementById('settings-dog-name').value.trim();
+    if (!newName) return;
+    await db.collection('families').doc(currentFamilyId).update({ dogName: newName })
+      .catch(() => { toast('⚠️ Save failed'); return; });
+    dogName = newName;
+    currentFamilyDoc = { ...currentFamilyDoc, dogName: newName };
+    updateDogNameUI();
+    toast(`Dog name updated to "${newName}"!`);
+  }
+
+  async function inviteMember() {
+    const email = document.getElementById('invite-email-input').value.trim().toLowerCase();
+    if (!email || !email.includes('@')) { toast('Please enter a valid email address.'); return; }
+
+    const familyRef = db.collection('families').doc(currentFamilyId);
+    const inviteRef = db.collection('invites').doc(email);
+
+    const batch = db.batch();
+    batch.update(familyRef, { memberEmails: firebase.firestore.FieldValue.arrayUnion(email) });
+    batch.set(inviteRef, {
+      pending: firebase.firestore.FieldValue.arrayUnion({
+        familyId:  currentFamilyId,
+        invitedBy: currentUser.email || '',
+        dogName:   dogName,
+        createdAt: new Date().toISOString()
+      })
+    }, { merge: true });
+
+    await batch.commit().catch(() => { toast('⚠️ Invite failed. Try again.'); return; });
+    document.getElementById('invite-email-input').value = '';
+    const snap = await familyRef.get();
+    currentFamilyDoc = snap.data();
+    renderMemberList();
+    toast(`✉️ Invite sent to ${email}`);
+  }
+
+  async function removeMember(email) {
+    if (!confirm(`Remove ${email} from this family?`)) return;
+    const familyRef = db.collection('families').doc(currentFamilyId);
+    const details   = currentFamilyDoc.memberDetails || [];
+    const detail    = details.find(d => d.email === email);
+    const memberUid = detail && detail.uid;
+
+    const updates = { memberEmails: firebase.firestore.FieldValue.arrayRemove(email) };
+    if (memberUid) {
+      updates.members       = firebase.firestore.FieldValue.arrayRemove(memberUid);
+      updates.memberDetails = firebase.firestore.FieldValue.arrayRemove({ email, uid: memberUid });
+    }
+
+    await familyRef.update(updates).catch(() => { toast('⚠️ Remove failed'); return; });
+    const snap = await familyRef.get();
+    currentFamilyDoc = snap.data();
+    renderMemberList();
+    toast(`${email} removed`);
+  }
+
+  function renderMemberList() {
+    const ul      = document.getElementById('settings-member-list');
+    const data    = currentFamilyDoc || {};
+    const emails  = data.memberEmails || [];
+    const isOwner = data.ownerUid === currentUser.uid;
+    const myEmail = (currentUser.email || '').toLowerCase();
+
+    if (emails.length === 0) {
+      ul.innerHTML = '<li class="member-item" style="color:#a0aec0;font-style:italic;">No members yet</li>';
+      return;
+    }
+    ul.innerHTML = emails.map(email => {
+      const isMe      = email === myEmail;
+      const removeBtn = isOwner && !isMe
+        ? `<button class="btn-sm btn-danger" onclick="removeMember('${email}')">Remove</button>`
+        : '';
+      return `<li class="member-item">
+        <span>${email}${isMe ? '<span class="member-you">(you)</span>' : ''}</span>
+        ${removeBtn}
+      </li>`;
+    }).join('');
+  }
+
+  async function switchDog() {
+    closeSettings();
+    const userSnap = await db.collection('users').doc(currentUser.uid).get();
+    const families = (userSnap.data() || {}).families || [];
+    if (families.length <= 1) return;
+    unbindFamily();
+    await showPickFamily(families);
+  }
+
+  // ─── Utilities ────────────────────────────────────────────────────────
   function fmtTime(iso) {
     const d = new Date(iso);
     return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) +
@@ -610,11 +933,6 @@
     if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
     const h = Math.floor(diff/3600), m = Math.floor((diff%3600)/60);
     return m > 0 ? `${h}h ${m}m ago` : `${h}h ago`;
-  }
-
-  function todayCount(log) {
-    const today = new Date().toDateString();
-    return log.filter(ts => new Date(ts).toDateString() === today).length;
   }
 
   function daysBetween(iso) {
@@ -633,22 +951,22 @@
     setTimeout(() => el.classList.remove('show'), 2200);
   }
 
-  // ─── Water ─────────────────────────────────────────────────────────────
+  // ─── Water ────────────────────────────────────────────────────────────
   function giveWater() {
+    if (!docRef) return;
     docRef.set({ waterLog: firebase.firestore.FieldValue.arrayUnion(new Date().toISOString()) }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
     toast('💧 Water recorded!');
-    // onSnapshot fires on this device too and will re-render
   }
 
   function renderWater() {
-    const today = new Date().toDateString();
+    const today       = new Date().toDateString();
     const todayEntries = waterLog.filter(ts => new Date(ts).toDateString() === today).reverse();
 
     document.getElementById('water-count').textContent = todayEntries.length;
 
     const sorted = [...waterLog].sort();
-    const last = sorted.length ? sorted[sorted.length - 1] : null;
+    const last   = sorted.length ? sorted[sorted.length - 1] : null;
     document.getElementById('water-elapsed').textContent = elapsedStr(last);
 
     const ul = document.getElementById('water-list');
@@ -667,29 +985,26 @@
   // ─── Diaper ───────────────────────────────────────────────────────────
   function toggleDiaper() {
     diaperOn = !diaperOn;
-    const row   = document.getElementById('diaper-toggle');
-    const check = document.getElementById('diaper-check');
-    row.classList.toggle('active', diaperOn);
-    check.textContent = diaperOn ? '✓' : '';
+    document.getElementById('diaper-toggle').classList.toggle('active', diaperOn);
+    document.getElementById('diaper-check').textContent = diaperOn ? '✓' : '';
   }
 
   // ─── Bathroom ─────────────────────────────────────────────────────────
   function recordBathroom(type) {
+    if (!docRef) return;
     const entry = { time: new Date().toISOString(), type, diaper: diaperOn };
     docRef.set({ bathroomLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
-    // auto-reset diaper after recording
     diaperOn = false;
     document.getElementById('diaper-toggle').classList.remove('active');
     document.getElementById('diaper-check').textContent = '';
     const labels = { piss:'📛 Pee Pee Time', poop:'💩 Poo Poo Time', both:'✨ All Poo Poo Time is Pee Pee Time' };
     toast(`${labels[type]} recorded!`);
-    // onSnapshot fires on this device too and will re-render
   }
 
   function renderBathroom() {
-    const today = new Date().toDateString();
-    const todayEntries = bathroomLog.filter(entry => new Date(entry.time).toDateString() === today).reverse();
+    const today        = new Date().toDateString();
+    const todayEntries = bathroomLog.filter(e => new Date(e.time).toDateString() === today).reverse();
 
     document.getElementById('walk-count').textContent = todayEntries.length;
     const lastWalk = bathroomLog.length ? bathroomLog[bathroomLog.length - 1].time : null;
@@ -703,9 +1018,7 @@
     const typeLabels = { piss: 'Pee Pee', poop: 'Poo Poo', both: 'Both' };
     const typeClass  = { piss: 'badge-piss', poop: 'badge-poop', both: 'badge-both' };
     ul.innerHTML = todayEntries.map(entry => {
-      const diaperBadge = entry.diaper
-        ? `<span class="badge badge-diaper">🨲</span>`
-        : '';
+      const diaperBadge = entry.diaper ? `<span class="badge badge-diaper">🨲</span>` : '';
       return `<li>
         <span class="recent-time">${fmtTime(entry.time)}</span>
         <span style="display:flex;align-items:center;gap:4px;">
@@ -718,15 +1031,11 @@
   }
 
   // ─── Incident ─────────────────────────────────────────────────────────
-  function showIncidentModal() {
-    document.getElementById('incident-modal').classList.add('show');
-  }
-
-  function closeIncidentModal() {
-    document.getElementById('incident-modal').classList.remove('show');
-  }
+  function showIncidentModal() { document.getElementById('incident-modal').classList.add('show'); }
+  function closeIncidentModal() { document.getElementById('incident-modal').classList.remove('show'); }
 
   function recordIncident(type) {
+    if (!docRef) return;
     closeIncidentModal();
     const ts = new Date().toISOString();
     docRef.set({
@@ -736,21 +1045,19 @@
       .catch(() => toast('⚠️ Save failed, try again'));
     const typeLabels = { puke: '🤢 Puke', pee: '💛 Pee', poop: '💩 Poop' };
     toast(`⚠️ Accident recorded — ${typeLabels[type] || type}`);
-    // onSnapshot fires on this device too and will re-render
   }
 
   function renderIncident() {
-    const days = daysBetween(incidentTs);
+    const days   = daysBetween(incidentTs);
     const daysEl = document.getElementById('incident-days');
     const dateEl = document.getElementById('incident-date');
-
-    if (incidentTs === null) {
+    if (!incidentTs) {
       daysEl.textContent = '—';
       dateEl.textContent = 'No accidents recorded';
     } else {
-      const lastEntry = incidentLog.find(e => e.time === incidentTs);
+      const lastEntry  = incidentLog.find(e => e.time === incidentTs);
       const typeLabels = { puke: 'Puke', pee: 'Pee', poop: 'Poop' };
-      const typeStr = lastEntry && lastEntry.type ? ` (${typeLabels[lastEntry.type] || lastEntry.type})` : '';
+      const typeStr    = lastEntry && lastEntry.type ? ` (${typeLabels[lastEntry.type] || lastEntry.type})` : '';
       daysEl.textContent = days;
       dateEl.textContent = `Last accident: ${fmtTime(incidentTs)}${typeStr}`;
     }
@@ -759,28 +1066,25 @@
   // ─── Food ─────────────────────────────────────────────────────────────
   function togglePumpkin() {
     pumpkinOn = !pumpkinOn;
-    const row   = document.getElementById('pumpkin-toggle');
-    const check = document.getElementById('pumpkin-check');
-    row.classList.toggle('active', pumpkinOn);
-    check.textContent = pumpkinOn ? '✓' : '';
+    document.getElementById('pumpkin-toggle').classList.toggle('active', pumpkinOn);
+    document.getElementById('pumpkin-check').textContent = pumpkinOn ? '✓' : '';
   }
 
   function recordFood(meal) {
+    if (!docRef) return;
     const entry = { time: new Date().toISOString(), meal, pumpkin: pumpkinOn };
-    docRef.set({ foodLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
-    // auto-reset pumpkin after recording
+    docRef.set({ foodLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true })
+      .catch(() => toast('⚠️ Save failed, try again'));
     pumpkinOn = false;
     document.getElementById('pumpkin-toggle').classList.remove('active');
     document.getElementById('pumpkin-check').textContent = '';
     const labels = { breakfast: '🌅 Breakfast', lunch: '☀️ Lunch', dinner: '🌙 Dinner' };
     toast(`${labels[meal]} recorded!`);
-    // onSnapshot fires on this device too and will re-render
   }
 
   function renderFood() {
-    const today = new Date().toDateString();
-    const todayEntries = foodLog.filter(entry => new Date(entry.time).toDateString() === today).reverse();
-
+    const today        = new Date().toDateString();
+    const todayEntries = foodLog.filter(e => new Date(e.time).toDateString() === today).reverse();
     const ul = document.getElementById('food-list');
     if (todayEntries.length === 0) {
       ul.innerHTML = '<li><span class="stat-value none">No feedings recorded today</span></li>';
@@ -803,57 +1107,45 @@
 
   // ─── Export ───────────────────────────────────────────────────────────
   function exportCSV(days) {
-    // cutoff = start of (today - days + 1) so "30 days" includes today through 29 days ago
     let cutoff = null;
     if (days !== null) {
       const now = new Date();
       cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days + 1).getTime();
     }
-
     const inRange = iso => cutoff === null || new Date(iso).getTime() >= cutoff;
     const fmtD    = iso => new Date(iso).toLocaleDateString();
     const fmtT    = iso => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    const entries = []; // { iso, row }
-
+    const entries = [];
     waterLog.filter(inRange).forEach(ts =>
       entries.push({ iso: ts, row: [fmtD(ts), fmtT(ts), 'Water', '', ''] })
     );
-
     const typeLabels = { piss: 'Pee', poop: 'Poop', both: 'Both' };
     bathroomLog.filter(e => inRange(e.time)).forEach(e =>
       entries.push({ iso: e.time, row: [fmtD(e.time), fmtT(e.time), 'Bathroom', typeLabels[e.type] || e.type, e.diaper ? 'Diaper' : ''] })
     );
-
     const mealLabels = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
     foodLog.filter(e => inRange(e.time)).forEach(e =>
       entries.push({ iso: e.time, row: [fmtD(e.time), fmtT(e.time), 'Feeding', mealLabels[e.meal] || e.meal, e.pumpkin ? 'Pumpkin' : ''] })
     );
-
     const incidentTypeLabels = { puke: 'Puke', pee: 'Pee', poop: 'Poop' };
     incidentLog.filter(e => inRange(e.time)).forEach(e =>
       entries.push({ iso: e.time, row: [fmtD(e.time), fmtT(e.time), 'Incident', incidentTypeLabels[e.type] || e.type || '', ''] })
     );
 
-    if (entries.length === 0) {
-      toast('No data in selected range');
-      return;
-    }
-
+    if (entries.length === 0) { toast('No data in selected range'); return; }
     entries.sort((a, b) => new Date(a.iso) - new Date(b.iso));
 
-    const header = ['Date', 'Time', 'Category', 'Detail', 'Note'];
-    const esc    = v => '"' + String(v).replace(/"/g, '""') + '"';
-    const csv    = [header, ...entries.map(e => e.row)]
-      .map(r => r.map(esc).join(','))
-      .join('\r\n');
-
-    const blob  = new Blob([csv], { type: 'text/csv' });
-    const url   = URL.createObjectURL(blob);
-    const a     = document.createElement('a');
-    const label = days === null ? 'all-time' : `${days}-days`;
+    const header   = ['Date', 'Time', 'Category', 'Detail', 'Note'];
+    const esc      = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const csv      = [header, ...entries.map(e => e.row)].map(r => r.map(esc).join(',')).join('\r\n');
+    const blob     = new Blob([csv], { type: 'text/csv' });
+    const url      = URL.createObjectURL(blob);
+    const a        = document.createElement('a');
+    const label    = days === null ? 'all-time' : `${days}-days`;
+    const safeName = dogName.toLowerCase().replace(/[^a-z0-9]/g, '-');
     a.href     = url;
-    a.download = `kenobi-tracker_${label}_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `${safeName}-tracker_${label}_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -861,14 +1153,7 @@
     toast('📤 Export ready!');
   }
 
-  // ─── Sharing ─────────────────────────────────────────────────────────
-  function copyLink() {
-    navigator.clipboard.writeText(location.href)
-      .then(() => toast('🔗 Link copied! Send to family member.'))
-      .catch(() => toast('Copy this URL: ' + location.href));
-  }
-
-  // ─── Live clock for elapsed times ─────────────────────────────────────────────
+  // ─── Tick ─────────────────────────────────────────────────────────────
   function tick() {
     renderWater();
     renderBathroom();
@@ -876,38 +1161,85 @@
     renderFood();
   }
 
-  // ─── Init ─────────────────────────────────────────────────────────────
-  tick();                      // render from localStorage immediately (fast first paint)
-  setInterval(tick, 30000);    // keep ticking for elapsed-time display ("14m ago" etc.)
-
-  // Sign in anonymously (invisible to user) so Firestore security rules are satisfied,
-  // then attach a real-time listener that keeps all devices in sync.
-  auth.signInAnonymously().catch(() => toast('⚠️ Could not connect to sync service')).then(() => {
-    docRef.onSnapshot(snap => {
-      if (!snap.exists) return;
-      const data = snap.data();
-      waterLog    = data.waterLog    || [];
-      bathroomLog = data.bathroomLog || [];
-      incidentTs  = data.incidentTs  || null;
-      incidentLog = data.incidentLog || [];
-      foodLog     = data.foodLog     || [];
-
-      // One-time migration: if incidentTs exists but incidentLog is empty,
-      // seed incidentLog from incidentTs so existing incident history is preserved in exports.
-      if (incidentTs && incidentLog.length === 0) {
-        incidentLog = [{ time: incidentTs }];
-        docRef.set({ incidentLog }, { merge: true });
-      }
-
-      // Mirror to localStorage as offline cache
-      save('waterLog',    waterLog);
-      save('bathroomLog', bathroomLog);
-      save('incidentTs',  incidentTs);
-      save('incidentLog', incidentLog);
-      save('foodLog',     foodLog);
-      tick(); // re-render all cards with latest data from any device
-    });
+  // ─── Entry point ──────────────────────────────────────────────────────
+  // Handle redirect result (mobile Google sign-in flow)
+  auth.getRedirectResult().catch(err => {
+    if (err && err.code && err.code !== 'auth/no-current-user') {
+      console.warn('Redirect sign-in error:', err.message);
+    }
   });
+
+  auth.onAuthStateChanged(async user => {
+    if (!user) {
+      unbindFamily();
+      showScreen('login');
+      return;
+    }
+
+    currentUser = user;
+
+    try {
+      await ensureUserDoc(user);
+      await processInvites(user);
+
+      const freshSnap = await db.collection('users').doc(user.uid).get();
+      const userData  = freshSnap.data() || {};
+      const families  = await pruneAndGetFamilies(userData.families || []);
+
+      if (families.length === 0) {
+        // Pre-fill claim input if arriving via an old ?session= URL
+        const sessionParam = new URLSearchParams(location.search).get('session');
+        if (sessionParam) {
+          document.getElementById('nf-claim-uuid').value = sessionParam;
+          document.getElementById('claim-details').open = true;
+        }
+        showScreen('no-family');
+      } else if (families.length === 1) {
+        await bindFamily(families[0]);
+      } else {
+        await showPickFamily(families);
+      }
+    } catch (e) {
+      console.error('Auth init error:', e);
+      toast('⚠️ Could not load your account. Check your connection.');
+      showScreen('login');
+    }
+  });
+
+  /*
+   * ─── FIRESTORE SECURITY RULES ─────────────────────────────────────────
+   * Deploy these in the Firebase Console → Firestore → Rules tab.
+   * After deploying, disable Anonymous Auth in Authentication → Sign-in methods.
+   *
+   * rules_version = '2';
+   * service cloud.firestore {
+   *   match /databases/{database}/documents {
+   *
+   *     match /families/{familyId} {
+   *       allow read:   if request.auth != null && request.auth.uid in resource.data.members;
+   *       allow create: if request.auth != null
+   *                     && request.auth.uid == request.resource.data.ownerUid
+   *                     && request.auth.uid in request.resource.data.members;
+   *       allow update: if request.auth != null && request.auth.uid == resource.data.ownerUid;
+   *       allow delete: if request.auth != null && request.auth.uid == resource.data.ownerUid;
+   *     }
+   *
+   *     match /users/{uid} {
+   *       allow read, write: if request.auth != null && request.auth.uid == uid;
+   *     }
+   *
+   *     match /trackers/{familyId} {
+   *       allow read, write: if request.auth != null
+   *         && request.auth.uid in get(/databases/$(database)/documents/families/$(familyId)).data.members;
+   *     }
+   *
+   *     match /invites/{email} {
+   *       allow read:  if request.auth != null && request.auth.token.email.lower() == email;
+   *       allow write: if request.auth != null;
+   *     }
+   *   }
+   * }
+   */
 </script>
 </body>
 </html>
