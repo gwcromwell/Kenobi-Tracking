@@ -550,9 +550,9 @@
   <div class="modal-box">
     <div class="modal-title">⚠️ What happened?</div>
     <div style="display:flex; gap:8px;">
-      <button class="btn btn-puke mb-0" onclick="recordIncident('puke')">🤢 Puke</button>
-      <button class="btn btn-piss mb-0" onclick="recordIncident('pee')">🚿 Pee</button>
-      <button class="btn btn-poop mb-0" onclick="recordIncident('poop')">💩 Poop</button>
+      <button class="btn btn-puke mb-0" onclick="recordIncident('puke')" style="display:flex;flex-direction:column;align-items:center;gap:2px;"><span>🤢</span><span>Puke</span></button>
+      <button class="btn btn-piss mb-0" onclick="recordIncident('pee')" style="display:flex;flex-direction:column;align-items:center;gap:2px;"><span>🚿</span><span>Pee</span></button>
+      <button class="btn btn-poop mb-0" onclick="recordIncident('poop')" style="display:flex;flex-direction:column;align-items:center;gap:2px;"><span>💩</span><span>Poop</span></button>
     </div>
     <button class="btn-cancel" onclick="closeIncidentModal()">Cancel</button>
   </div>
@@ -608,6 +608,14 @@
   let foodLog     = load('foodLog')     || [];   // [{time, meal, pumpkin}]
   let diaperOn    = false;
   let pumpkinOn   = false;
+  const lastEventTimes = {};
+
+  function canLog(key) {
+    const now = Date.now();
+    if (lastEventTimes[key] && now - lastEventTimes[key] < 2000) return false;
+    lastEventTimes[key] = now;
+    return true;
+  }
 
   // ─── Label maps — defined once here and reused throughout ──────────
 
@@ -623,8 +631,9 @@
   const MEAL_BADGE_CLASS  = { breakfast: 'badge-breakfast', lunch: 'badge-lunch', dinner: 'badge-dinner' };
 
   // Incident: emoji labels for toasts, plain-text labels for the counter display and CSV export
-  const INCIDENT_EMOJI_LABELS = { puke: '🤢 Puke', pee: '🚿 Pee', poop: '💩 Poop' };
-  const INCIDENT_TYPE_LABELS  = { puke: 'Puke', pee: 'Pee', poop: 'Poop' };
+  const INCIDENT_EMOJI_LABELS      = { puke: '🤢 Puke', pee: '🚿 Pee', poop: '💩 Poop' };
+  const INCIDENT_TYPE_LABELS       = { puke: 'Puke', pee: 'Pee', poop: 'Poop' };
+  const INCIDENT_TYPE_PAST_LABELS  = { puke: 'Puked', pee: 'Peed', poop: 'Pooped' };
 
   // ─── Utilities ──────────────────────────────────────────────────
 
@@ -718,6 +727,7 @@
   // ─── Water ─────────────────────────────────────────────────────────────
 
   function giveWater() {
+    if (!canLog('water')) return;
     docRef.set({ waterLog: firebase.firestore.FieldValue.arrayUnion(new Date().toISOString()) }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
     toast('💧 Water recorded!');
@@ -743,6 +753,7 @@
   // ─── Bathroom ─────────────────────────────────────────────────────────
 
   function recordBathroom(type) {
+    if (!canLog('bathroom_' + type)) return;
     const entry = { time: new Date().toISOString(), type, diaper: diaperOn };
     docRef.set({ bathroomLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
@@ -783,6 +794,7 @@
   }
 
   function recordIncident(type) {
+    if (!canLog('incident_' + type)) { closeIncidentModal(); return; }
     closeIncidentModal();
     const ts = new Date().toISOString();
     docRef.set({
@@ -805,7 +817,7 @@
     } else {
       const lastEntry = incidentLog.find(e => e.time === incidentTs);
       const typeStr   = lastEntry && lastEntry.type
-        ? ` (${INCIDENT_TYPE_LABELS[lastEntry.type] || lastEntry.type})`
+        ? ` (${INCIDENT_TYPE_PAST_LABELS[lastEntry.type] || lastEntry.type})`
         : '';
       daysEl.textContent = days;
       dateEl.textContent = `Last accident: ${fmtTime(incidentTs)}${typeStr}`;
@@ -815,6 +827,7 @@
   // ─── Food ─────────────────────────────────────────────────────────────
 
   function recordFood(meal) {
+    if (!canLog('food_' + meal)) return;
     const entry = { time: new Date().toISOString(), meal, pumpkin: pumpkinOn };
     docRef.set({ foodLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
