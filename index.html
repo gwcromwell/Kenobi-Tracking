@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kenobi Habit Tracker</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js">
+  <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js">
+  <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -12,14 +15,33 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:          #fdf8f2;
-      --card:        #ffffff;
-      --text-dark:   #1c1917;
-      --text-mid:    #57534e;
-      --text-muted:  #a8a29e;
-      --shadow:      0 2px 18px rgba(180,140,100,0.13);
-      --radius-card: 16px;
-      --radius-btn:  12px;
+      --bg:                #fdf8f2;
+      --card:              #ffffff;
+      --text-dark:         #1c1917;
+      --text-mid:          #57534e;
+      --text-muted:        #a8a29e;
+      --shadow:            0 2px 18px rgba(180,140,100,0.13);
+      --radius-card:       16px;
+      --radius-btn:        12px;
+      /* ── Brand accent colours — change here to retheme the whole app ── */
+      --color-water:       #2f7fc1;
+      --color-water-dk:    #1a5a8f;
+      --color-bathroom:    #c8941a;
+      --color-bathroom-dk: #9a6e0d;
+      --color-food:        #16a34a;
+      --color-food-dk:     #15803d;
+      --color-incident:    #dc2626;
+      --color-incident-dk: #991b1b;
+      --color-both:        #8b5cf6;
+      --color-both-dk:     #6d35e0;
+      --color-brown:       #7b5c3a;
+      --color-brown-dk:    #5a3e22;
+      --color-breakfast:   #ea580c;
+      --color-breakfast-dk:#c2410c;
+      --color-dinner:      #5b21b6;
+      --color-dinner-dk:   #3b0764;
+      --color-export:      #44403c;
+      --color-export-dk:   #292524;
     }
 
     body {
@@ -41,7 +63,7 @@
       line-height: 1.15;
     }
 
-    h1 span { color: #e53e3e; }
+    h1 span { color: var(--color-incident); }
 
     /* ── GRID & CARDS ─────────────────────────────────────────────── */
     .grid {
@@ -62,10 +84,10 @@
 
     .card.full-width { grid-column: 1 / -1; }
 
-    .card[data-card="water"]    { border-left-color: #3b9edd; background: linear-gradient(135deg, #f0f8ff 0%, #fff 45%); }
-    .card[data-card="bathroom"] { border-left-color: #c8941a; background: linear-gradient(135deg, #fffbf0 0%, #fff 45%); }
-    .card[data-card="food"]     { border-left-color: #28a159; background: linear-gradient(135deg, #f0fff6 0%, #fff 45%); }
-    .card[data-card="incident"] { border-left-color: #dc2626; background: linear-gradient(135deg, #fff8f8 0%, #fff 45%); }
+    .card[data-card="water"]    { border-left-color: var(--color-water);    background: linear-gradient(135deg, #f0f8ff 0%, #fff 45%); }
+    .card[data-card="bathroom"] { border-left-color: var(--color-bathroom); background: linear-gradient(135deg, #fffbf0 0%, #fff 45%); }
+    .card[data-card="food"]     { border-left-color: var(--color-food);     background: linear-gradient(135deg, #f0fff6 0%, #fff 45%); }
+    .card[data-card="incident"] { border-left-color: var(--color-incident); background: linear-gradient(135deg, #fff8f8 0%, #fff 45%); }
     .card[data-card="export"]   { border-left-color: #64748b; }
 
     .card-title {
@@ -97,12 +119,12 @@
       text-transform: none;
     }
     .btn-edit-mode:hover { background: rgba(0,0,0,0.06); color: var(--text-dark); }
-    .card.edit-mode .btn-edit-mode { color: #2f7fc1; background: #e8f4fd; }
+    .card.edit-mode .btn-edit-mode { color: var(--color-water); background: #e8f4fd; }
 
     .btn-delete-entry {
       background: none;
       border: none;
-      color: #dc2626;
+      color: var(--color-incident);
       font-size: 1.1rem;
       line-height: 1;
       cursor: pointer;
@@ -136,13 +158,20 @@
       transition: transform 0.08s, box-shadow 0.08s;
     }
 
-    .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.2) !important; }
+    /* .btn:active has higher specificity (0,2,0) than .btn-water (0,1,0) — no !important needed */
+    .btn:active     { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.2); }
+    .btn-sq:active  { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.2); }
 
-    .btn-water    { background: #2f7fc1; color: #fff; box-shadow: 0 4px 0 #1a5a8f, 0 6px 14px rgba(47,127,193,0.28); font-size: 1rem; }
-    .btn-piss     { background: #c8941a; color: #fff; box-shadow: 0 4px 0 #9a6e0d, 0 6px 14px rgba(200,148,26,0.28); }
-    .btn-poop     { background: #7b5c3a; color: #fff; box-shadow: 0 4px 0 #5a3e22, 0 6px 14px rgba(123,92,58,0.28); }
-    .btn-both     { background: #8b5cf6; color: #fff; box-shadow: 0 4px 0 #6d35e0, 0 6px 14px rgba(139,92,246,0.28); }
-    .btn-incident { background: #dc2626; color: #fff; box-shadow: 0 4px 0 #991b1b, 0 6px 14px rgba(220,38,38,0.32); }
+    .btn-water    { background: var(--color-water);     color: #fff; box-shadow: 0 4px 0 var(--color-water-dk),     0 6px 14px rgba(47,127,193,0.28); font-size: 1rem; }
+    .btn-piss     { background: var(--color-bathroom);  color: #fff; box-shadow: 0 4px 0 var(--color-bathroom-dk),  0 6px 14px rgba(200,148,26,0.28); }
+    .btn-poop     { background: var(--color-brown);     color: #fff; box-shadow: 0 4px 0 var(--color-brown-dk),     0 6px 14px rgba(123,92,58,0.28); }
+    .btn-both     { background: var(--color-both);      color: #fff; box-shadow: 0 4px 0 var(--color-both-dk),      0 6px 14px rgba(139,92,246,0.28); }
+    .btn-incident { background: var(--color-incident);  color: #fff; box-shadow: 0 4px 0 var(--color-incident-dk),  0 6px 14px rgba(220,38,38,0.32); }
+    .btn-puke     { background: var(--color-food);      color: #fff; box-shadow: 0 4px 0 var(--color-food-dk),      0 6px 14px rgba(22,163,74,0.28); }
+    .btn-breakfast { background: var(--color-breakfast); color: #fff; box-shadow: 0 4px 0 var(--color-breakfast-dk), 0 6px 14px rgba(234,88,12,0.28); }
+    .btn-lunch     { background: var(--color-food);      color: #fff; box-shadow: 0 4px 0 var(--color-food-dk),      0 6px 14px rgba(22,163,74,0.28); }
+    .btn-dinner    { background: var(--color-dinner);    color: #fff; box-shadow: 0 4px 0 var(--color-dinner-dk),    0 6px 14px rgba(91,33,182,0.28); }
+    .btn-export    { background: var(--color-export);    color: #fff; box-shadow: 0 4px 0 var(--color-export-dk),    0 6px 12px rgba(68,64,60,0.28); font-size: 0.85rem; }
 
     .btn-sq {
       font-family: 'Nunito', sans-serif;
@@ -163,13 +192,19 @@
       transition: transform 0.08s, box-shadow 0.08s;
     }
 
-    .btn-sq:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.2) !important; }
     .btn-sq .sq-icon { font-size: 1.8rem; line-height: 1; }
-    .btn-sq.btn-incident { box-shadow: 0 4px 0 #991b1b, 0 6px 14px rgba(220,38,38,0.32); }
+    .btn-sq.btn-incident { box-shadow: 0 4px 0 var(--color-incident-dk), 0 6px 14px rgba(220,38,38,0.32); }
 
-    .btn-breakfast { background: #ea580c; color: #fff; box-shadow: 0 4px 0 #c2410c, 0 6px 14px rgba(234,88,12,0.28); }
-    .btn-lunch     { background: #16a34a; color: #fff; box-shadow: 0 4px 0 #15803d, 0 6px 14px rgba(22,163,74,0.28); }
-    .btn-dinner    { background: #5b21b6; color: #fff; box-shadow: 0 4px 0 #3b0764, 0 6px 14px rgba(91,33,182,0.28); }
+    /* Modal incident buttons stack emoji above label */
+    .modal-btn-row .btn {
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      margin-bottom: 0;
+    }
+
+    /* Food action buttons fill their row equally */
+    .food-btn-row .btn { flex: 1; margin-bottom: 0; }
 
     /* ── TOGGLES ──────────────────────────────────────────────────── */
     .diaper-row {
@@ -186,7 +221,7 @@
       transition: border-color 0.15s, background 0.15s;
     }
 
-    .diaper-row.active { border-color: #48bb78; background: #f0fff4; }
+    .diaper-row.active { border-color: var(--color-food); background: #f0fff4; }
 
     .diaper-check {
       width: 24px;
@@ -201,9 +236,10 @@
       transition: all 0.15s;
     }
 
-    .diaper-row.active .diaper-check { background: #48bb78; border-color: #48bb78; color: #fff; }
+    .diaper-row.active .diaper-check { background: var(--color-food); border-color: var(--color-food); color: #fff; }
     .diaper-label { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.9rem; color: #44403c; }
     .diaper-row.active .diaper-label { color: #276749; }
+    .food-actions .diaper-row { margin-bottom: 0; }
 
     /* ── STATS ────────────────────────────────────────────────────── */
     .stat-block {
@@ -229,9 +265,9 @@
       color: var(--text-dark);
     }
 
-    .stat-value.big    { font-size: 2rem; font-weight: 800; color: #2f7fc1; line-height: 1; }
-    .stat-value.elapsed { font-size: 1.15rem; font-weight: 700; color: #dc2626; }
-    .stat-value.none   { color: var(--text-muted); font-weight: 400; font-style: italic; font-size: 0.85rem; }
+    .stat-value.big     { font-size: 2rem; font-weight: 800; color: var(--color-water); line-height: 1; }
+    .stat-value.elapsed { font-size: 1.15rem; font-weight: 700; color: var(--color-incident); }
+    .stat-value.none    { color: var(--text-muted); font-weight: 400; font-style: italic; font-size: 0.85rem; }
 
     /* ── RECENT LISTS ─────────────────────────────────────────────── */
     .recent-list { list-style: none; }
@@ -246,11 +282,12 @@
       border-bottom: 1px solid rgba(0,0,0,0.05);
     }
 
-    .recent-list li:last-child { border-bottom: none; }
+    .recent-list li:last-child  { border-bottom: none; }
     .recent-list li:nth-child(even) { background: rgba(0,0,0,0.025); }
 
     .recent-time { font-family: 'Nunito', sans-serif; font-weight: 700; color: var(--text-dark); }
     .recent-ago  { color: var(--text-muted); font-size: 0.75rem; background: rgba(0,0,0,0.06); padding: 2px 8px; border-radius: 20px; }
+    .badge-row   { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 
     /* ── BADGES ───────────────────────────────────────────────────── */
     .badge {
@@ -272,6 +309,9 @@
     .badge-pumpkin   { background: #fef3c7; color: #92400e; }
 
     /* ── INCIDENT ─────────────────────────────────────────────────── */
+    .incident-row { display: flex; gap: 10px; align-items: center; }
+    .incident-flex { flex: 1; }
+
     .incident-big {
       text-align: center;
       padding: 10px;
@@ -288,9 +328,9 @@
       transition: color 0.4s;
     }
 
-    .incident-days.fresh   { color: #dc2626; }
+    .incident-days.fresh   { color: var(--color-incident); }
     .incident-days.warning { color: #d97706; }
-    .incident-days.great   { color: #16a34a; }
+    .incident-days.great   { color: var(--color-food); }
 
     .incident-days-label {
       font-size: 0.72rem;
@@ -307,16 +347,31 @@
       margin-top: 5px;
     }
 
-    /* ── RESPONSIVE ───────────────────────────────────────────────── */
-    @media (max-width: 600px) {
-      h1 { font-size: 1.45rem; }
-      .grid { grid-template-columns: 1fr; }
-      .card.full-width { grid-column: auto; }
-      .food-cols { flex-direction: column; }
-      .food-cols > div { height: auto !important; }
-      .stat-value.big { font-size: 2rem; }
-      .incident-days { font-size: 2.8rem; }
+    /* ── FOOD LAYOUT ──────────────────────────────────────────────── */
+    .food-cols    { display: flex; gap: 10px; align-items: stretch; }
+    .food-col     { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .food-col .stat-block { flex: 1; margin-bottom: 0; }
+    .food-actions { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+    .food-btn-row { display: flex; gap: 5px; }
+
+    /* ── EXPORT & SHARING ─────────────────────────────────────────── */
+    .export-section { max-width: 960px; margin: 8px auto 14px; }
+    .export-row     { display: flex; gap: 6px; }
+    .share-section  { text-align: center; margin-top: 12px; margin-bottom: 4px; }
+
+    .btn-share {
+      background: none;
+      border: 1.5px solid #d5cfc7;
+      border-radius: 10px;
+      padding: 7px 16px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #78716c;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
     }
+    .btn-share:hover { border-color: #a8a29e; color: #44403c; }
 
     /* ── TOAST ────────────────────────────────────────────────────── */
     #toast {
@@ -339,34 +394,10 @@
     }
 
     #toast.show { transform: translateX(-50%) translateY(0); }
-    #toast[data-type="water"]    { border-left-color: #3b9edd; }
-    #toast[data-type="bathroom"] { border-left-color: #c8941a; }
-    #toast[data-type="food"]     { border-left-color: #28a159; }
-    #toast[data-type="incident"] { border-left-color: #dc2626; }
-
-    /* ── EXPORT ───────────────────────────────────────────────────── */
-    .export-section { max-width: 960px; margin: 8px auto 14px; }
-
-    .btn-export {
-      background: #44403c;
-      color: #fff;
-      box-shadow: 0 4px 0 #292524, 0 6px 12px rgba(68,64,60,0.28);
-      font-size: 0.85rem;
-    }
-
-    .btn-share {
-      background: none;
-      border: 1.5px solid #d5cfc7;
-      border-radius: 10px;
-      padding: 7px 16px;
-      font-family: 'Nunito', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #78716c;
-      cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-    }
-    .btn-share:hover { border-color: #a8a29e; color: #44403c; }
+    #toast[data-type="water"]    { border-left-color: var(--color-water); }
+    #toast[data-type="bathroom"] { border-left-color: var(--color-bathroom); }
+    #toast[data-type="food"]     { border-left-color: var(--color-food); }
+    #toast[data-type="incident"] { border-left-color: var(--color-incident); }
 
     /* ── MODALS ───────────────────────────────────────────────────── */
     .modal-overlay {
@@ -404,7 +435,8 @@
       margin-bottom: 18px;
     }
 
-    .btn-puke   { background: #16a34a; color: #fff; box-shadow: 0 4px 0 #15803d, 0 6px 14px rgba(22,163,74,0.28); }
+    .modal-btn-row { display: flex; gap: 8px; }
+
     .btn-cancel {
       margin-top: 16px;
       background: none;
@@ -418,14 +450,23 @@
     }
     .btn-cancel:hover { color: var(--text-mid); }
 
-    /* ── UTILITIES ────────────────────────────────────────────────── */
-    .food-cols   { display: flex; gap: 10px; align-items: stretch; }
+    /* ── RESPONSIVE ───────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      h1 { font-size: 1.45rem; }
+      .grid { grid-template-columns: 1fr; }
+      .card.full-width { grid-column: auto; }
+      .food-cols { flex-direction: column; }
+      .food-col .stat-block { flex: none; margin-bottom: 6px; }
+      .stat-value.big { font-size: 2rem; }
+      .incident-days { font-size: 2.8rem; }
+    }
+
+    /* ── MISC UTILITIES ───────────────────────────────────────────── */
     .stat-row    { display: flex; gap: 6px; margin-bottom: 6px; }
     .stat-center { flex: 1; text-align: center; }
     .stat-wide   { flex: 2; }
     .stat-unit   { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
     .hint-text   { font-size: 0.72rem; color: var(--text-muted); }
-    .mb-0        { margin-bottom: 0 !important; }
 
   </style>
 </head>
@@ -435,10 +476,12 @@
 
 <div class="grid">
 
-  <!-- WATER CARD: logs individual watering events; shows today's count and elapsed time since last -->
+  <!-- WATER CARD -->
   <div class="card" data-card="water" id="water-card">
-    <div class="card-title"><span class="icon">💧</span> Water<button class="btn-edit-mode" onclick="toggleEditMode('water')" title="Edit entries">✏️</button></div>
-
+    <div class="card-title">
+      <span class="icon">💧</span> Water
+      <button class="btn-edit-mode" id="water-edit-btn" title="Edit entries">✏️</button>
+    </div>
     <div class="stat-row">
       <div class="stat-block stat-center">
         <div class="stat-label">Today</div>
@@ -450,23 +493,21 @@
         <div class="stat-value elapsed" id="water-elapsed">—</div>
       </div>
     </div>
-
     <div class="stat-block">
       <div class="stat-label">Today's Waterings</div>
       <ul class="recent-list" id="water-list">
         <li><span class="stat-value none">No waterings recorded today</span></li>
       </ul>
     </div>
-
-    <button class="btn btn-water" onclick="giveWater()">
-      💧 Give Water Now
-    </button>
+    <button class="btn btn-water" id="btn-give-water">💧 Give Water Now</button>
   </div>
 
-  <!-- BATHROOM CARD: records outdoor bathroom trips with type (pee/poop/both) and optional diaper flag -->
+  <!-- BATHROOM CARD -->
   <div class="card" data-card="bathroom" id="bathroom-card">
-    <div class="card-title"><span class="icon">🚶</span> Bathroom<button class="btn-edit-mode" onclick="toggleEditMode('bathroom')" title="Edit entries">✏️</button></div>
-
+    <div class="card-title">
+      <span class="icon">🚶</span> Bathroom
+      <button class="btn-edit-mode" id="bathroom-edit-btn" title="Edit entries">✏️</button>
+    </div>
     <div class="stat-row">
       <div class="stat-block stat-center">
         <div class="stat-label">Walks Today</div>
@@ -478,26 +519,16 @@
         <div class="stat-value elapsed" id="walk-elapsed">—</div>
       </div>
     </div>
-
     <div class="stat-block">
       <div class="stat-label">Today's Outings</div>
       <ul class="recent-list" id="bathroom-list">
         <li><span class="stat-value none">No outings recorded today</span></li>
       </ul>
     </div>
-
-    <button class="btn btn-piss" onclick="recordBathroom('piss')">
-      🚿 Pee Pee Time
-    </button>
-    <button class="btn btn-poop" onclick="recordBathroom('poop')">
-      💩 Poo Poo Time
-    </button>
-    <button class="btn btn-both" onclick="recordBathroom('both')">
-      ✨ All Poo Poo Time is Pee Pee Time
-    </button>
-
-    <!-- Toggle this before pressing a bathroom button to flag that a diaper was used -->
-    <div class="diaper-row" id="diaper-toggle" onclick="toggleDiaper()">
+    <button class="btn btn-piss" id="btn-bathroom-piss">🚿 Pee Pee Time</button>
+    <button class="btn btn-poop" id="btn-bathroom-poop">💩 Poo Poo Time</button>
+    <button class="btn btn-both" id="btn-bathroom-both">✨ All Poo Poo Time is Pee Pee Time</button>
+    <div class="diaper-row" id="diaper-toggle">
       <div class="diaper-check" id="diaper-check"></div>
       <div>
         <div class="diaper-label">Diaper Used</div>
@@ -506,33 +537,28 @@
     </div>
   </div>
 
-  <!-- FOOD CARD: logs meals (breakfast/lunch/dinner) with optional pumpkin supplement flag -->
+  <!-- FOOD CARD -->
   <div class="card full-width" data-card="food" id="food-card">
-    <div class="card-title"><span class="icon">🍽️</span> Feeding<button class="btn-edit-mode" onclick="toggleEditMode('food')" title="Edit entries">✏️</button></div>
-
+    <div class="card-title">
+      <span class="icon">🍽️</span> Feeding
+      <button class="btn-edit-mode" id="food-edit-btn" title="Edit entries">✏️</button>
+    </div>
     <div class="food-cols">
-      <div style="flex:1; min-width:0;">
-        <div class="stat-block mb-0" style="height:100%;">
+      <div class="food-col">
+        <div class="stat-block">
           <div class="stat-label">Today's Feedings</div>
           <ul class="recent-list" id="food-list">
             <li><span class="stat-value none">No feedings recorded today</span></li>
           </ul>
         </div>
       </div>
-      <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:5px;">
-        <div style="display:flex; gap:5px;">
-          <button class="btn btn-breakfast mb-0" onclick="recordFood('breakfast')">
-            🌅 Breakfast
-          </button>
-          <button class="btn btn-lunch mb-0" onclick="recordFood('lunch')">
-            ☀️ Lunch
-          </button>
-          <button class="btn btn-dinner mb-0" onclick="recordFood('dinner')">
-            🌙 Dinner
-          </button>
+      <div class="food-actions">
+        <div class="food-btn-row">
+          <button class="btn btn-breakfast" id="btn-breakfast">🌅 Breakfast</button>
+          <button class="btn btn-lunch"     id="btn-lunch">☀️ Lunch</button>
+          <button class="btn btn-dinner"    id="btn-dinner">🌙 Dinner</button>
         </div>
-        <!-- Toggle this before pressing a meal button to record wet food + pumpkin supplement -->
-        <div class="diaper-row mb-0" id="pumpkin-toggle" onclick="togglePumpkin()">
+        <div class="diaper-row" id="pumpkin-toggle">
           <div class="diaper-check" id="pumpkin-check"></div>
           <div>
             <div class="diaper-label">Add Pumpkin</div>
@@ -543,17 +569,16 @@
     </div>
   </div>
 
-  <!-- INCIDENT CARD: tracks accidents and shows a running "days since last incident" counter -->
+  <!-- INCIDENT CARD -->
   <div class="card full-width" data-card="incident">
     <div class="card-title"><span class="icon">⚠️</span> Accident / Incident</div>
-
-    <div style="display:flex; gap:10px; align-items:center;">
-      <div class="incident-big mb-0" style="flex:1;">
+    <div class="incident-row">
+      <div class="incident-big incident-flex">
         <div class="incident-days" id="incident-days">—</div>
         <div class="incident-days-label">days since last accident</div>
-        <div class="incident-date mb-0" id="incident-date">No accidents recorded</div>
+        <div class="incident-date" id="incident-date">No accidents recorded</div>
       </div>
-      <button class="btn-sq btn-incident" onclick="showIncidentModal()">
+      <button class="btn-sq btn-incident" id="btn-incident-show">
         <span class="sq-icon">⚠️</span>
         <span>Whoops</span>
       </button>
@@ -562,64 +587,66 @@
 
 </div>
 
-<!-- EXPORT SECTION: download all logged data as a CSV file for a chosen time range -->
+<!-- EXPORT SECTION -->
 <div class="export-section">
   <div class="card" data-card="export">
     <div class="card-title"><span class="icon">📤</span> Export Data</div>
-    <div style="display:flex; gap:6px;">
-      <button class="btn btn-export" onclick="exportCSV(30)">Last 30 Days</button>
-      <button class="btn btn-export" onclick="exportCSV(90)">Last 90 Days</button>
-      <button class="btn btn-export" onclick="exportCSV(null)">All Time</button>
+    <div class="export-row">
+      <button class="btn btn-export" id="btn-export-30">Last 30 Days</button>
+      <button class="btn btn-export" id="btn-export-90">Last 90 Days</button>
+      <button class="btn btn-export" id="btn-export-all">All Time</button>
     </div>
   </div>
 </div>
 
-<!-- SHARING: copies the current session URL to the clipboard for family members to join -->
-<div style="text-align:center; margin-top:12px; margin-bottom:4px;">
-  <button class="btn-share" onclick="copyLink()">🔗 Copy Sharing Link</button>
+<!-- SHARING -->
+<div class="share-section">
+  <button class="btn-share" id="btn-copy-link">🔗 Copy Sharing Link</button>
 </div>
 
-<!-- INCIDENT TYPE MODAL: shown when the Whoops button is pressed; selects the accident type -->
-<div class="modal-overlay" id="incident-modal" onclick="if(event.target===this)closeIncidentModal()">
+<!-- INCIDENT TYPE MODAL -->
+<div class="modal-overlay" id="incident-modal">
   <div class="modal-box">
     <div class="modal-title">⚠️ What happened?</div>
-    <div style="display:flex; gap:8px;">
-      <button class="btn btn-puke mb-0" onclick="recordIncident('puke')" style="display:flex;flex-direction:column;align-items:center;gap:2px;"><span>🤢</span><span>Puke</span></button>
-      <button class="btn btn-piss mb-0" onclick="recordIncident('pee')" style="display:flex;flex-direction:column;align-items:center;gap:2px;"><span>🚿</span><span>Pee</span></button>
-      <button class="btn btn-poop mb-0" onclick="recordIncident('poop')" style="display:flex;flex-direction:column;align-items:center;gap:2px;"><span>💩</span><span>Poop</span></button>
+    <div class="modal-btn-row">
+      <button class="btn btn-puke" id="btn-incident-puke"><span>🤢</span><span>Puke</span></button>
+      <button class="btn btn-piss" id="btn-incident-pee"><span>🚿</span><span>Pee</span></button>
+      <button class="btn btn-poop" id="btn-incident-poop"><span>💩</span><span>Poop</span></button>
     </div>
-    <button class="btn-cancel" onclick="closeIncidentModal()">Cancel</button>
+    <button class="btn-cancel" id="btn-incident-cancel">Cancel</button>
   </div>
 </div>
 
 <div id="toast"></div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script>
-  // ─── Firebase init ─────────────────────────────────────────────
-  firebase.initializeApp({
-    apiKey: "AIzaSyAjf5_FXec1K3e56QgBeENn4P3jblJX2Ys",
-    authDomain: "dog-tracker-294ea.firebaseapp.com",
-    projectId: "dog-tracker-294ea",
-    storageBucket: "dog-tracker-294ea.firebasestorage.app",
-    messagingSenderId: "368709759023",
-    appId: "1:368709759023:web:255a2e1cff4e90d331d6da"
-  });
-  const db   = firebase.firestore();
-  const auth = firebase.auth();
+<script type="module">
+  import { initializeApp }
+    from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+  import { getAuth, signInAnonymously }
+    from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+  import { getFirestore, doc, setDoc, onSnapshot, arrayUnion, arrayRemove }
+    from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 
-  // ─── Storage helpers (kept for fast first-paint / offline cache) ───
+  // ─── Firebase init ────────────────────────────────────────────────────
+  const app = initializeApp({
+    apiKey:            'AIzaSyAjf5_FXec1K3e56QgBeENn4P3jblJX2Ys',
+    authDomain:        'dog-tracker-294ea.firebaseapp.com',
+    projectId:         'dog-tracker-294ea',
+    storageBucket:     'dog-tracker-294ea.firebasestorage.app',
+    messagingSenderId: '368709759023',
+    appId:             '1:368709759023:web:255a2e1cff4e90d331d6da'
+  });
+  const db   = getFirestore(app);
+  const auth = getAuth(app);
+
+  // ─── Storage helpers ──────────────────────────────────────────────────
   const load = key => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
   const save = (key, val) => localStorage.setItem(key, JSON.stringify(val));
 
-  // ─── Session ID ────────────────────────────────────────────────────
+  // ─── Session ID ───────────────────────────────────────────────────────
   // Uses ?session=uuid query param as the shareable room code.
-  // Query params (not hash fragments) are used because hash fragments are
-  // frequently stripped by iMessage/SMS before the link is opened, which
-  // would generate a new UUID on the second device instead of joining the
-  // same session. Falls back to localStorage so page reloads keep the same session.
+  // Query params (not hash) are used because hash fragments are stripped by
+  // iMessage/SMS, which would generate a new UUID instead of joining the session.
   function getSessionId() {
     const params = new URLSearchParams(location.search);
     let id = params.get('session');
@@ -632,19 +659,30 @@
     return id;
   }
   const SESSION_ID = getSessionId();
-  const docRef = db.collection('trackers').doc(SESSION_ID);
+  const docRef     = doc(db, 'trackers', SESSION_ID);
 
-  // ─── State (seeded from localStorage for instant first paint) ─────
-  let waterLog    = load('waterLog')    || [];   // array of ISO strings
-  let bathroomLog = load('bathroomLog') || [];   // [{time, type, diaper}]
-  let incidentTs  = load('incidentTs')  || null; // ISO string or null — most recent, drives the UI counter
-  let incidentLog = load('incidentLog') || [];   // [{time, type}] — full history for export
-  let foodLog     = load('foodLog')     || [];   // [{time, meal, pumpkin}]
+  // ─── State ────────────────────────────────────────────────────────────
+  let waterLog    = load('waterLog')    || [];
+  let bathroomLog = load('bathroomLog') || [];
+  let incidentTs  = load('incidentTs')  || null;
+  let incidentLog = load('incidentLog') || [];
+  let foodLog     = load('foodLog')     || [];
   let diaperOn    = false;
   let pumpkinOn   = false;
   const lastEventTimes = {};
   const editModeCards  = new Set();
 
+  // ─── HTML escaping — prevents XSS when injecting Firestore data via innerHTML ──
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ─── Double-submission guard ──────────────────────────────────────────
   function canLog(key) {
     const now = Date.now();
     if (lastEventTimes[key] && now - lastEventTimes[key] < 2000) return false;
@@ -652,8 +690,79 @@
     return true;
   }
 
-  // ─── Edit mode & deletion ────────────────────────────────────────
+  // ─── Label maps ───────────────────────────────────────────────────────
+  const BATHROOM_TOAST_LABELS  = { piss: '🚿 Pee Pee Time', poop: '💩 Poo Poo Time', both: '✨ All Poo Poo Time is Pee Pee Time' };
+  const BATHROOM_BADGE_LABELS  = { piss: 'Pee Pee', poop: 'Poo Poo', both: 'Both' };
+  const BATHROOM_BADGE_CLASS   = { piss: 'badge-piss', poop: 'badge-poop', both: 'badge-both' };
+  const BATHROOM_EXPORT_LABELS = { piss: 'Pee', poop: 'Poop', both: 'Both' };
 
+  const MEAL_TOAST_LABELS = { breakfast: '🌅 Breakfast', lunch: '☀️ Lunch', dinner: '🌙 Dinner' };
+  const MEAL_BADGE_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
+  const MEAL_BADGE_CLASS  = { breakfast: 'badge-breakfast', lunch: 'badge-lunch', dinner: 'badge-dinner' };
+
+  const INCIDENT_EMOJI_LABELS     = { puke: '🤢 Puke', pee: '🚿 Pee', poop: '💩 Poop' };
+  const INCIDENT_TYPE_LABELS      = { puke: 'Puke', pee: 'Pee', poop: 'Poop' };
+  const INCIDENT_TYPE_PAST_LABELS = { puke: 'Puked', pee: 'Peed', poop: 'Pooped' };
+
+  // ─── Utilities ────────────────────────────────────────────────────────
+  function fmtTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) +
+           ' ' + d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+
+  function fmtDate(iso)     { return new Date(iso).toLocaleDateString(); }
+  function fmtTimeOnly(iso) { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+
+  function elapsedStr(iso) {
+    if (!iso) return '—';
+    const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+    if (diff < 60)   return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60);
+    return m > 0 ? `${h}h ${m}m ago` : `${h}h ago`;
+  }
+
+  function filterToday(log, getTime = ts => ts) {
+    const today = new Date().toDateString();
+    return log.filter(e => new Date(getTime(e)).toDateString() === today);
+  }
+
+  function daysBetween(iso) {
+    if (!iso) return null;
+    const d   = new Date(iso);
+    const day = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const now = new Date();
+    const tod = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.round((tod - day) / 86400000);
+  }
+
+  function toast(msg, type = '') {
+    const el = document.getElementById('toast');
+    el.textContent  = msg;
+    el.dataset.type = type;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  // ─── Render helper ────────────────────────────────────────────────────
+  function renderList(elementId, entries, formatter, emptyMsg) {
+    const ul = document.getElementById(elementId);
+    ul.innerHTML = entries.length
+      ? entries.map(formatter).join('')
+      : `<li><span class="stat-value none">${escapeHtml(emptyMsg)}</span></li>`;
+  }
+
+  // ─── Toggle helpers ───────────────────────────────────────────────────
+  function applyToggle(toggleId, checkId, isOn) {
+    document.getElementById(toggleId).classList.toggle('active', isOn);
+    document.getElementById(checkId).textContent = isOn ? '✓' : '';
+  }
+
+  function toggleDiaper()  { diaperOn  = !diaperOn;  applyToggle('diaper-toggle',  'diaper-check',  diaperOn); }
+  function togglePumpkin() { pumpkinOn = !pumpkinOn; applyToggle('pumpkin-toggle', 'pumpkin-check', pumpkinOn); }
+
+  // ─── Edit mode ────────────────────────────────────────────────────────
   function toggleEditMode(card) {
     editModeCards.has(card) ? editModeCards.delete(card) : editModeCards.add(card);
     document.getElementById(card + '-card').classList.toggle('edit-mode', editModeCards.has(card));
@@ -662,10 +771,11 @@
     if (card === 'food')     renderFood();
   }
 
+  // ─── Deletion ─────────────────────────────────────────────────────────
   function deleteWater(ts) {
     waterLog = waterLog.filter(t => t !== ts);
     save('waterLog', waterLog);
-    docRef.set({ waterLog: firebase.firestore.FieldValue.arrayRemove(ts) }, { merge: true })
+    setDoc(docRef, { waterLog: arrayRemove(ts) }, { merge: true })
       .catch(() => toast('⚠️ Delete failed, try again'));
     renderWater();
   }
@@ -675,7 +785,7 @@
     if (!entry) return;
     bathroomLog = bathroomLog.filter(e => e.time !== time);
     save('bathroomLog', bathroomLog);
-    docRef.set({ bathroomLog: firebase.firestore.FieldValue.arrayRemove(entry) }, { merge: true })
+    setDoc(docRef, { bathroomLog: arrayRemove(entry) }, { merge: true })
       .catch(() => toast('⚠️ Delete failed, try again'));
     renderBathroom();
   }
@@ -685,217 +795,92 @@
     if (!entry) return;
     foodLog = foodLog.filter(e => e.time !== time);
     save('foodLog', foodLog);
-    docRef.set({ foodLog: firebase.firestore.FieldValue.arrayRemove(entry) }, { merge: true })
+    setDoc(docRef, { foodLog: arrayRemove(entry) }, { merge: true })
       .catch(() => toast('⚠️ Delete failed, try again'));
     renderFood();
   }
 
-  // ─── Label maps — defined once here and reused throughout ──────────
-
-  // Bathroom: toast labels (with emoji), badge display text, badge CSS class, CSV export text
-  const BATHROOM_TOAST_LABELS  = { piss: '🚿 Pee Pee Time', poop: '💩 Poo Poo Time', both: '✨ All Poo Poo Time is Pee Pee Time' };
-  const BATHROOM_BADGE_LABELS  = { piss: 'Pee Pee', poop: 'Poo Poo', both: 'Both' };
-  const BATHROOM_BADGE_CLASS   = { piss: 'badge-piss', poop: 'badge-poop', both: 'badge-both' };
-  const BATHROOM_EXPORT_LABELS = { piss: 'Pee', poop: 'Poop', both: 'Both' };
-
-  // Food: toast labels (with emoji), badge display text, badge CSS class
-  const MEAL_TOAST_LABELS = { breakfast: '🌅 Breakfast', lunch: '☀️ Lunch', dinner: '🌙 Dinner' };
-  const MEAL_BADGE_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
-  const MEAL_BADGE_CLASS  = { breakfast: 'badge-breakfast', lunch: 'badge-lunch', dinner: 'badge-dinner' };
-
-  // Incident: emoji labels for toasts, plain-text labels for the counter display and CSV export
-  const INCIDENT_EMOJI_LABELS      = { puke: '🤢 Puke', pee: '🚿 Pee', poop: '💩 Poop' };
-  const INCIDENT_TYPE_LABELS       = { puke: 'Puke', pee: 'Pee', poop: 'Poop' };
-  const INCIDENT_TYPE_PAST_LABELS  = { puke: 'Puked', pee: 'Peed', poop: 'Pooped' };
-
-  // ─── Utilities ──────────────────────────────────────────────────
-
-  // Format an ISO timestamp as "hh:mm AM/PM Mon DD"
-  function fmtTime(iso) {
-    const d = new Date(iso);
-    return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) +
-           ' ' + d.toLocaleDateString([], {month:'short', day:'numeric'});
-  }
-
-  // Format an ISO timestamp as a locale date string (used for CSV export rows)
-  function fmtDate(iso) { return new Date(iso).toLocaleDateString(); }
-
-  // Format an ISO timestamp as an hh:mm time-only string (used for CSV export rows)
-  function fmtTimeOnly(iso) { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
-
-  // Return a human-readable elapsed-time string ("14m ago", "2h 5m ago", etc.)
-  function elapsedStr(iso) {
-    if (!iso) return '—';
-    const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-    if (diff < 60) return `${diff}s ago`;
-    if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
-    const h = Math.floor(diff/3600), m = Math.floor((diff%3600)/60);
-    return m > 0 ? `${h}h ${m}m ago` : `${h}h ago`;
-  }
-
-  // Count how many items in a flat ISO-string array fall on today's date
-  function todayCount(log) {
-    const today = new Date().toDateString();
-    return log.filter(ts => new Date(ts).toDateString() === today).length;
-  }
-
-  // Filter a log array to entries from today.
-  // getTime extracts the timestamp from each entry (defaults to identity for flat string arrays).
-  function filterToday(log, getTime = ts => ts) {
-    const today = new Date().toDateString();
-    return log.filter(e => new Date(getTime(e)).toDateString() === today);
-  }
-
-  // Return the number of full calendar days between the given ISO timestamp and today
-  function daysBetween(iso) {
-    if (!iso) return null;
-    const d = new Date(iso);
-    const incidentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    return Math.round((today - incidentDay) / 86400000);
-  }
-
-  // Show a brief notification toast at the bottom of the screen for 2.2 seconds.
-  // type sets the left-border accent color: 'water' | 'bathroom' | 'food' | 'incident'
-  function toast(msg, type = '') {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.dataset.type = type;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 2200);
-  }
-
-  // ─── Toggle helpers ──────────────────────────────────────────────
-
-  // Apply visual active/inactive state to a diaper or pumpkin toggle row.
-  // Shared by toggleDiaper() and togglePumpkin() to avoid duplicating DOM logic.
-  function applyToggle(toggleId, checkId, isOn) {
-    document.getElementById(toggleId).classList.toggle('active', isOn);
-    document.getElementById(checkId).textContent = isOn ? '✓' : '';
-  }
-
-  function toggleDiaper() {
-    diaperOn = !diaperOn;
-    applyToggle('diaper-toggle', 'diaper-check', diaperOn);
-  }
-
-  function togglePumpkin() {
-    pumpkinOn = !pumpkinOn;
-    applyToggle('pumpkin-toggle', 'pumpkin-check', pumpkinOn);
-  }
-
-  // ─── Render helper ───────────────────────────────────────────────
-
-  // Populate a <ul> list element with rendered entries.
-  // Shows an empty-state message when the entries array is empty;
-  // otherwise maps each entry through formatter() and injects the resulting HTML.
-  function renderList(elementId, entries, formatter, emptyMsg) {
-    const ul = document.getElementById(elementId);
-    if (entries.length === 0) {
-      ul.innerHTML = `<li><span class="stat-value none">${emptyMsg}</span></li>`;
-      return;
-    }
-    ul.innerHTML = entries.map(formatter).join('');
-  }
-
-  // ─── Water ─────────────────────────────────────────────────────────────
-
+  // ─── Water ───────────────────────────────────────────────────────────
   function giveWater() {
     if (!canLog('water')) return;
-    docRef.set({ waterLog: firebase.firestore.FieldValue.arrayUnion(new Date().toISOString()) }, { merge: true })
+    const ts = new Date().toISOString();
+    setDoc(docRef, { waterLog: arrayUnion(ts) }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
     toast('💧 Water recorded!', 'water');
-    // onSnapshot fires on this device too and will re-render
   }
 
   function renderWater() {
     const todayEntries = filterToday(waterLog).reverse();
-    document.getElementById('water-count').textContent = todayEntries.length;
-
-    const sorted = [...waterLog].sort();
-    document.getElementById('water-elapsed').textContent = elapsedStr(sorted.length ? sorted[sorted.length - 1] : null);
-
+    document.getElementById('water-count').textContent   = todayEntries.length;
+    document.getElementById('water-elapsed').textContent = elapsedStr(
+      waterLog.length ? [...waterLog].sort().at(-1) : null
+    );
     renderList('water-list', todayEntries, ts =>
       `<li>
-        <button class="btn-delete-entry" onclick="deleteWater('${ts}')" title="Delete">×</button>
-        <span class="recent-time">${fmtTime(ts)}</span>
-        <span class="recent-ago">${elapsedStr(ts)}</span>
+        <button class="btn-delete-entry" data-ts="${escapeHtml(ts)}" title="Delete">×</button>
+        <span class="recent-time">${escapeHtml(fmtTime(ts))}</span>
+        <span class="recent-ago">${escapeHtml(elapsedStr(ts))}</span>
       </li>`,
       'No waterings recorded today'
     );
   }
 
-  // ─── Bathroom ─────────────────────────────────────────────────────────
-
+  // ─── Bathroom ────────────────────────────────────────────────────────
   function recordBathroom(type) {
     if (!canLog('bathroom_' + type)) return;
     const entry = { time: new Date().toISOString(), type, diaper: diaperOn };
-    docRef.set({ bathroomLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true })
+    setDoc(docRef, { bathroomLog: arrayUnion(entry) }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
-    // Auto-reset diaper toggle after recording
     diaperOn = false;
     applyToggle('diaper-toggle', 'diaper-check', false);
     toast(`${BATHROOM_TOAST_LABELS[type]} recorded!`, 'bathroom');
-    // onSnapshot fires on this device too and will re-render
   }
 
   function renderBathroom() {
     const todayEntries = filterToday(bathroomLog, e => e.time).reverse();
-    document.getElementById('walk-count').textContent = todayEntries.length;
-    document.getElementById('walk-elapsed').textContent =
-      elapsedStr(bathroomLog.length ? bathroomLog[bathroomLog.length - 1].time : null);
-
+    document.getElementById('walk-count').textContent   = todayEntries.length;
+    document.getElementById('walk-elapsed').textContent = elapsedStr(bathroomLog.at(-1)?.time ?? null);
     renderList('bathroom-list', todayEntries, entry => {
       const diaperBadge = entry.diaper ? `<span class="badge badge-diaper">🨲</span>` : '';
       return `<li>
-        <button class="btn-delete-entry" onclick="deleteBathroom('${entry.time}')" title="Delete">×</button>
-        <span class="recent-time">${fmtTime(entry.time)}</span>
-        <span style="display:flex;align-items:center;gap:4px;">
-          <span class="badge ${BATHROOM_BADGE_CLASS[entry.type]}">${BATHROOM_BADGE_LABELS[entry.type]}</span>
+        <button class="btn-delete-entry" data-time="${escapeHtml(entry.time)}" title="Delete">×</button>
+        <span class="recent-time">${escapeHtml(fmtTime(entry.time))}</span>
+        <span class="badge-row">
+          <span class="badge ${escapeHtml(BATHROOM_BADGE_CLASS[entry.type] || '')}">${escapeHtml(BATHROOM_BADGE_LABELS[entry.type] || '')}</span>
           ${diaperBadge}
-          <span class="recent-ago">${elapsedStr(entry.time)}</span>
+          <span class="recent-ago">${escapeHtml(elapsedStr(entry.time))}</span>
         </span>
       </li>`;
     }, 'No outings recorded today');
   }
 
-  // ─── Incident ─────────────────────────────────────────────────────────
-
-  function showIncidentModal() {
-    document.getElementById('incident-modal').classList.add('show');
-  }
-
-  function closeIncidentModal() {
-    document.getElementById('incident-modal').classList.remove('show');
-  }
+  // ─── Incident ────────────────────────────────────────────────────────
+  function showIncidentModal()  { document.getElementById('incident-modal').classList.add('show'); }
+  function closeIncidentModal() { document.getElementById('incident-modal').classList.remove('show'); }
 
   function recordIncident(type) {
     if (!canLog('incident_' + type)) { closeIncidentModal(); return; }
     closeIncidentModal();
     const ts = new Date().toISOString();
-    docRef.set({
+    setDoc(docRef, {
       incidentTs:  ts,
-      incidentLog: firebase.firestore.FieldValue.arrayUnion({ time: ts, type })
+      incidentLog: arrayUnion({ time: ts, type })
     }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
     toast(`⚠️ Accident recorded — ${INCIDENT_EMOJI_LABELS[type] || type}`, 'incident');
-    // onSnapshot fires on this device too and will re-render
   }
 
   function renderIncident() {
     const days   = daysBetween(incidentTs);
     const daysEl = document.getElementById('incident-days');
     const dateEl = document.getElementById('incident-date');
-
     daysEl.classList.remove('fresh', 'warning', 'great');
-
     if (incidentTs === null) {
       daysEl.textContent = '—';
       dateEl.textContent = 'No accidents recorded';
     } else {
       const lastEntry = incidentLog.find(e => e.time === incidentTs);
-      const typeStr   = lastEntry && lastEntry.type
+      const typeStr   = lastEntry?.type
         ? ` (${INCIDENT_TYPE_PAST_LABELS[lastEntry.type] || lastEntry.type})`
         : '';
       daysEl.textContent = days;
@@ -904,18 +889,15 @@
     }
   }
 
-  // ─── Food ─────────────────────────────────────────────────────────────
-
+  // ─── Food ────────────────────────────────────────────────────────────
   function recordFood(meal) {
     if (!canLog('food_' + meal)) return;
     const entry = { time: new Date().toISOString(), meal, pumpkin: pumpkinOn };
-    docRef.set({ foodLog: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true })
+    setDoc(docRef, { foodLog: arrayUnion(entry) }, { merge: true })
       .catch(() => toast('⚠️ Save failed, try again'));
-    // Auto-reset pumpkin toggle after recording
     pumpkinOn = false;
     applyToggle('pumpkin-toggle', 'pumpkin-check', false);
     toast(`${MEAL_TOAST_LABELS[meal]} recorded!`, 'food');
-    // onSnapshot fires on this device too and will re-render
   }
 
   function renderFood() {
@@ -923,47 +905,37 @@
     renderList('food-list', todayEntries, entry => {
       const pumpkinBadge = entry.pumpkin ? `<span class="badge badge-pumpkin">🎃</span>` : '';
       return `<li>
-        <button class="btn-delete-entry" onclick="deleteFood('${entry.time}')" title="Delete">×</button>
-        <span class="recent-time">${fmtTime(entry.time)}</span>
-        <span style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
-          <span class="badge ${MEAL_BADGE_CLASS[entry.meal]}">${MEAL_BADGE_LABELS[entry.meal]}</span>
+        <button class="btn-delete-entry" data-time="${escapeHtml(entry.time)}" title="Delete">×</button>
+        <span class="recent-time">${escapeHtml(fmtTime(entry.time))}</span>
+        <span class="badge-row">
+          <span class="badge ${escapeHtml(MEAL_BADGE_CLASS[entry.meal] || '')}">${escapeHtml(MEAL_BADGE_LABELS[entry.meal] || '')}</span>
           ${pumpkinBadge}
-          <span class="recent-ago">${elapsedStr(entry.time)}</span>
+          <span class="recent-ago">${escapeHtml(elapsedStr(entry.time))}</span>
         </span>
       </li>`;
     }, 'No feedings recorded today');
   }
 
   // ─── Export ───────────────────────────────────────────────────────────
-
-  // Gather all log entries that fall within the cutoff window, across every category,
-  // and return them as a sorted array of { iso, row } objects ready for CSV serialisation.
-  // cutoff is a Unix-ms timestamp; pass null to include all time.
   function buildExportEntries(cutoff) {
     const inRange = iso => cutoff === null || new Date(iso).getTime() >= cutoff;
     const entries = [];
-
     waterLog.filter(inRange).forEach(ts =>
       entries.push({ iso: ts, row: [fmtDate(ts), fmtTimeOnly(ts), 'Water', '', ''] })
     );
-
     bathroomLog.filter(e => inRange(e.time)).forEach(e =>
       entries.push({ iso: e.time, row: [fmtDate(e.time), fmtTimeOnly(e.time), 'Bathroom', BATHROOM_EXPORT_LABELS[e.type] || e.type, e.diaper ? 'Diaper' : ''] })
     );
-
     foodLog.filter(e => inRange(e.time)).forEach(e =>
       entries.push({ iso: e.time, row: [fmtDate(e.time), fmtTimeOnly(e.time), 'Feeding', MEAL_BADGE_LABELS[e.meal] || e.meal, e.pumpkin ? 'Pumpkin' : ''] })
     );
-
     incidentLog.filter(e => inRange(e.time)).forEach(e =>
       entries.push({ iso: e.time, row: [fmtDate(e.time), fmtTimeOnly(e.time), 'Incident', INCIDENT_TYPE_LABELS[e.type] || e.type || '', ''] })
     );
-
     entries.sort((a, b) => new Date(a.iso) - new Date(b.iso));
     return entries;
   }
 
-  // Trigger a browser download of a CSV string with a timestamped filename
   function downloadCSV(csv, label) {
     const blob = new Blob([csv], { type: 'text/csv' });
     const url  = URL.createObjectURL(blob);
@@ -976,40 +948,29 @@
     URL.revokeObjectURL(url);
   }
 
-  // Export all events in the given window to a CSV file.
-  // days=null exports all time; days=30 exports the last 30 days (inclusive of today).
   function exportCSV(days) {
-    // Cutoff = start of (today - days + 1) so "30 days" includes today through 29 days ago
     let cutoff = null;
     if (days !== null) {
       const now = new Date();
       cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days + 1).getTime();
     }
-
     const entries = buildExportEntries(cutoff);
     if (entries.length === 0) { toast('No data in selected range'); return; }
-
-    const header = ['Date', 'Time', 'Category', 'Detail', 'Note'];
-    const esc    = v => '"' + String(v).replace(/"/g, '""') + '"';
-    const csv    = [header, ...entries.map(e => e.row)]
-      .map(r => r.map(esc).join(','))
-      .join('\r\n');
-
-    const label = days === null ? 'all-time' : `${days}-days`;
-    downloadCSV(csv, label);
+    const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const csv = [['Date', 'Time', 'Category', 'Detail', 'Note'], ...entries.map(e => e.row)]
+      .map(r => r.map(esc).join(',')).join('\r\n');
+    downloadCSV(csv, days === null ? 'all-time' : `${days}-days`);
     toast('📤 Export ready!');
   }
 
-  // ─── Sharing ─────────────────────────────────────────────────────────
-
+  // ─── Sharing ──────────────────────────────────────────────────────────
   function copyLink() {
     navigator.clipboard.writeText(location.href)
       .then(() => toast('🔗 Link copied! Send to family member.'))
       .catch(() => toast('Copy this URL: ' + location.href));
   }
 
-  // ─── Live clock ───────────────────────────────────────────────────────
-  // Re-renders all cards every 30 seconds so elapsed-time strings ("14m ago") stay current
+  // ─── Render all ───────────────────────────────────────────────────────
   function tick() {
     renderWater();
     renderBathroom();
@@ -1017,41 +978,81 @@
     renderFood();
   }
 
-  // ─── Init ─────────────────────────────────────────────────────────────
-  tick();                      // Render from localStorage immediately (fast first paint)
-  setInterval(tick, 30000);    // Keep ticking so elapsed-time strings stay current
+  // ─── Event listeners (no inline onclick handlers) ─────────────────────
+  document.getElementById('btn-give-water').addEventListener('click', giveWater);
+  document.getElementById('btn-bathroom-piss').addEventListener('click', () => recordBathroom('piss'));
+  document.getElementById('btn-bathroom-poop').addEventListener('click', () => recordBathroom('poop'));
+  document.getElementById('btn-bathroom-both').addEventListener('click', () => recordBathroom('both'));
+  document.getElementById('btn-breakfast').addEventListener('click', () => recordFood('breakfast'));
+  document.getElementById('btn-lunch').addEventListener('click',     () => recordFood('lunch'));
+  document.getElementById('btn-dinner').addEventListener('click',    () => recordFood('dinner'));
+  document.getElementById('btn-incident-show').addEventListener('click', showIncidentModal);
+  document.getElementById('btn-incident-puke').addEventListener('click', () => recordIncident('puke'));
+  document.getElementById('btn-incident-pee').addEventListener('click',  () => recordIncident('pee'));
+  document.getElementById('btn-incident-poop').addEventListener('click', () => recordIncident('poop'));
+  document.getElementById('btn-incident-cancel').addEventListener('click', closeIncidentModal);
+  document.getElementById('diaper-toggle').addEventListener('click', toggleDiaper);
+  document.getElementById('pumpkin-toggle').addEventListener('click', togglePumpkin);
+  document.getElementById('btn-export-30').addEventListener('click',  () => exportCSV(30));
+  document.getElementById('btn-export-90').addEventListener('click',  () => exportCSV(90));
+  document.getElementById('btn-export-all').addEventListener('click', () => exportCSV(null));
+  document.getElementById('btn-copy-link').addEventListener('click', copyLink);
+  document.getElementById('water-edit-btn').addEventListener('click',    () => toggleEditMode('water'));
+  document.getElementById('bathroom-edit-btn').addEventListener('click', () => toggleEditMode('bathroom'));
+  document.getElementById('food-edit-btn').addEventListener('click',     () => toggleEditMode('food'));
 
-  // Sign in anonymously so Firestore security rules are satisfied, then attach a
-  // real-time listener that syncs state across all devices sharing this session URL.
-  auth.signInAnonymously().catch(() => toast('⚠️ Could not connect to sync service')).then(() => {
-    docRef.onSnapshot(snap => {
-      if (!snap.exists) return;
+  // Close modal on backdrop click
+  document.getElementById('incident-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeIncidentModal();
+  });
+
+  // Event delegation for dynamically-rendered delete buttons
+  document.getElementById('water-list').addEventListener('click', e => {
+    const btn = e.target.closest('.btn-delete-entry');
+    if (btn) deleteWater(btn.dataset.ts);
+  });
+  document.getElementById('bathroom-list').addEventListener('click', e => {
+    const btn = e.target.closest('.btn-delete-entry');
+    if (btn) deleteBathroom(btn.dataset.time);
+  });
+  document.getElementById('food-list').addEventListener('click', e => {
+    const btn = e.target.closest('.btn-delete-entry');
+    if (btn) deleteFood(btn.dataset.time);
+  });
+
+  // ─── Init ─────────────────────────────────────────────────────────────
+  tick();
+  setInterval(tick, 30000);
+
+  try {
+    await signInAnonymously(auth);
+    onSnapshot(docRef, snap => {
+      if (!snap.exists()) return;
       const data = snap.data();
 
-      // Pull the latest state from Firestore into local variables
       waterLog    = data.waterLog    || [];
       bathroomLog = data.bathroomLog || [];
       incidentTs  = data.incidentTs  || null;
       incidentLog = data.incidentLog || [];
       foodLog     = data.foodLog     || [];
 
-      // One-time migration: if incidentTs exists but incidentLog is empty,
-      // seed incidentLog from incidentTs so existing incident history is preserved in exports.
+      // One-time migration: seed incidentLog from incidentTs if history was empty
       if (incidentTs && incidentLog.length === 0) {
         incidentLog = [{ time: incidentTs }];
-        docRef.set({ incidentLog }, { merge: true });
+        setDoc(docRef, { incidentLog }, { merge: true });
       }
 
-      // Mirror to localStorage as an offline cache for the next page load
       save('waterLog',    waterLog);
       save('bathroomLog', bathroomLog);
       save('incidentTs',  incidentTs);
       save('incidentLog', incidentLog);
       save('foodLog',     foodLog);
 
-      tick(); // Re-render all cards with the latest data from any device
+      tick();
     });
-  });
+  } catch {
+    toast('⚠️ Could not connect to sync service');
+  }
 </script>
 </body>
 </html>
