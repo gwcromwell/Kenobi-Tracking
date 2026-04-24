@@ -27,16 +27,16 @@
       background: var(--bg);
       color: var(--text-dark);
       min-height: 100vh;
-      padding: 14px 10px 40px;
+      padding: 8px 8px 20px;
     }
 
     h1 {
       font-family: 'Nunito', sans-serif;
       text-align: center;
-      font-size: 1.75rem;
+      font-size: 1.5rem;
       font-weight: 800;
       color: var(--text-dark);
-      margin-bottom: 14px;
+      margin-bottom: 8px;
       letter-spacing: -0.5px;
       line-height: 1.15;
     }
@@ -47,7 +47,7 @@
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 8px;
       max-width: 960px;
       margin: 0 auto;
     }
@@ -55,7 +55,7 @@
     .card {
       background: var(--card);
       border-radius: var(--radius-card);
-      padding: 14px;
+      padding: 10px 12px;
       box-shadow: var(--shadow);
       border-left: 4px solid transparent;
     }
@@ -75,11 +75,45 @@
       text-transform: uppercase;
       letter-spacing: 0.07em;
       color: var(--text-mid);
-      margin-bottom: 10px;
+      margin-bottom: 7px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
+
+    .btn-edit-mode {
+      margin-left: auto;
+      background: none;
+      border: none;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 2px 7px;
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      transition: background 0.1s, color 0.1s;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .btn-edit-mode:hover { background: rgba(0,0,0,0.06); color: var(--text-dark); }
+    .card.edit-mode .btn-edit-mode { color: #2f7fc1; background: #e8f4fd; }
+
+    .btn-delete-entry {
+      background: none;
+      border: none;
+      color: #dc2626;
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0 5px 0 0;
+      flex-shrink: 0;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+    }
+    .card.edit-mode .btn-delete-entry { opacity: 1; pointer-events: auto; }
 
     .icon { font-size: 1rem; }
 
@@ -92,12 +126,12 @@
       gap: 6px;
       border: none;
       border-radius: var(--radius-btn);
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 800;
       cursor: pointer;
-      padding: 12px 14px;
+      padding: 9px 12px;
       width: 100%;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       line-height: 1.2;
       transition: transform 0.08s, box-shadow 0.08s;
     }
@@ -144,8 +178,8 @@
       gap: 10px;
       background: #f8f6f2;
       border-radius: 10px;
-      padding: 9px 12px;
-      margin-bottom: 6px;
+      padding: 7px 10px;
+      margin-bottom: 4px;
       border: 2px solid #e8e2d9;
       cursor: pointer;
       user-select: none;
@@ -175,8 +209,8 @@
     .stat-block {
       background: rgba(0,0,0,0.035);
       border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 8px;
+      padding: 6px 10px;
+      margin-bottom: 6px;
     }
 
     .stat-label {
@@ -195,8 +229,8 @@
       color: var(--text-dark);
     }
 
-    .stat-value.big    { font-size: 2.4rem; font-weight: 800; color: #2f7fc1; line-height: 1; }
-    .stat-value.elapsed { font-size: 1.3rem; font-weight: 700; color: #dc2626; }
+    .stat-value.big    { font-size: 2rem; font-weight: 800; color: #2f7fc1; line-height: 1; }
+    .stat-value.elapsed { font-size: 1.15rem; font-weight: 700; color: #dc2626; }
     .stat-value.none   { color: var(--text-muted); font-weight: 400; font-style: italic; font-size: 0.85rem; }
 
     /* ── RECENT LISTS ─────────────────────────────────────────────── */
@@ -240,7 +274,7 @@
     /* ── INCIDENT ─────────────────────────────────────────────────── */
     .incident-big {
       text-align: center;
-      padding: 16px 10px;
+      padding: 10px;
       background: #fff5f5;
       border-radius: 12px;
       border: 2px solid #fecaca;
@@ -248,7 +282,7 @@
 
     .incident-days {
       font-family: 'Nunito', sans-serif;
-      font-size: 3.5rem;
+      font-size: 2.8rem;
       font-weight: 800;
       line-height: 1;
       transition: color 0.4s;
@@ -311,7 +345,7 @@
     #toast[data-type="incident"] { border-left-color: #dc2626; }
 
     /* ── EXPORT ───────────────────────────────────────────────────── */
-    .export-section { max-width: 960px; margin: 12px auto 20px; }
+    .export-section { max-width: 960px; margin: 8px auto 14px; }
 
     .btn-export {
       background: #44403c;
@@ -386,7 +420,7 @@
 
     /* ── UTILITIES ────────────────────────────────────────────────── */
     .food-cols   { display: flex; gap: 10px; align-items: stretch; }
-    .stat-row    { display: flex; gap: 8px; margin-bottom: 8px; }
+    .stat-row    { display: flex; gap: 6px; margin-bottom: 6px; }
     .stat-center { flex: 1; text-align: center; }
     .stat-wide   { flex: 2; }
     .stat-unit   { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
@@ -402,8 +436,8 @@
 <div class="grid">
 
   <!-- WATER CARD: logs individual watering events; shows today's count and elapsed time since last -->
-  <div class="card" data-card="water">
-    <div class="card-title"><span class="icon">💧</span> Water</div>
+  <div class="card" data-card="water" id="water-card">
+    <div class="card-title"><span class="icon">💧</span> Water<button class="btn-edit-mode" onclick="toggleEditMode('water')" title="Edit entries">✏️ Edit</button></div>
 
     <div class="stat-row">
       <div class="stat-block stat-center">
@@ -430,8 +464,8 @@
   </div>
 
   <!-- BATHROOM CARD: records outdoor bathroom trips with type (pee/poop/both) and optional diaper flag -->
-  <div class="card" data-card="bathroom">
-    <div class="card-title"><span class="icon">🚶</span> Bathroom</div>
+  <div class="card" data-card="bathroom" id="bathroom-card">
+    <div class="card-title"><span class="icon">🚶</span> Bathroom<button class="btn-edit-mode" onclick="toggleEditMode('bathroom')" title="Edit entries">✏️ Edit</button></div>
 
     <div class="stat-row">
       <div class="stat-block stat-center">
@@ -473,8 +507,8 @@
   </div>
 
   <!-- FOOD CARD: logs meals (breakfast/lunch/dinner) with optional pumpkin supplement flag -->
-  <div class="card full-width" data-card="food">
-    <div class="card-title"><span class="icon">🍽️</span> Feeding</div>
+  <div class="card full-width" data-card="food" id="food-card">
+    <div class="card-title"><span class="icon">🍽️</span> Feeding<button class="btn-edit-mode" onclick="toggleEditMode('food')" title="Edit entries">✏️ Edit</button></div>
 
     <div class="food-cols">
       <div style="flex:1; min-width:0;">
@@ -609,12 +643,51 @@
   let diaperOn    = false;
   let pumpkinOn   = false;
   const lastEventTimes = {};
+  const editModeCards  = new Set();
 
   function canLog(key) {
     const now = Date.now();
     if (lastEventTimes[key] && now - lastEventTimes[key] < 2000) return false;
     lastEventTimes[key] = now;
     return true;
+  }
+
+  // ─── Edit mode & deletion ────────────────────────────────────────
+
+  function toggleEditMode(card) {
+    editModeCards.has(card) ? editModeCards.delete(card) : editModeCards.add(card);
+    document.getElementById(card + '-card').classList.toggle('edit-mode', editModeCards.has(card));
+    if (card === 'water')    renderWater();
+    if (card === 'bathroom') renderBathroom();
+    if (card === 'food')     renderFood();
+  }
+
+  function deleteWater(ts) {
+    waterLog = waterLog.filter(t => t !== ts);
+    save('waterLog', waterLog);
+    docRef.set({ waterLog: firebase.firestore.FieldValue.arrayRemove(ts) }, { merge: true })
+      .catch(() => toast('⚠️ Delete failed, try again'));
+    renderWater();
+  }
+
+  function deleteBathroom(time) {
+    const entry = bathroomLog.find(e => e.time === time);
+    if (!entry) return;
+    bathroomLog = bathroomLog.filter(e => e.time !== time);
+    save('bathroomLog', bathroomLog);
+    docRef.set({ bathroomLog: firebase.firestore.FieldValue.arrayRemove(entry) }, { merge: true })
+      .catch(() => toast('⚠️ Delete failed, try again'));
+    renderBathroom();
+  }
+
+  function deleteFood(time) {
+    const entry = foodLog.find(e => e.time === time);
+    if (!entry) return;
+    foodLog = foodLog.filter(e => e.time !== time);
+    save('foodLog', foodLog);
+    docRef.set({ foodLog: firebase.firestore.FieldValue.arrayRemove(entry) }, { merge: true })
+      .catch(() => toast('⚠️ Delete failed, try again'));
+    renderFood();
   }
 
   // ─── Label maps — defined once here and reused throughout ──────────
@@ -745,6 +818,7 @@
 
     renderList('water-list', todayEntries, ts =>
       `<li>
+        <button class="btn-delete-entry" onclick="deleteWater('${ts}')" title="Delete">×</button>
         <span class="recent-time">${fmtTime(ts)}</span>
         <span class="recent-ago">${elapsedStr(ts)}</span>
       </li>`,
@@ -775,6 +849,7 @@
     renderList('bathroom-list', todayEntries, entry => {
       const diaperBadge = entry.diaper ? `<span class="badge badge-diaper">🨲</span>` : '';
       return `<li>
+        <button class="btn-delete-entry" onclick="deleteBathroom('${entry.time}')" title="Delete">×</button>
         <span class="recent-time">${fmtTime(entry.time)}</span>
         <span style="display:flex;align-items:center;gap:4px;">
           <span class="badge ${BATHROOM_BADGE_CLASS[entry.type]}">${BATHROOM_BADGE_LABELS[entry.type]}</span>
@@ -848,6 +923,7 @@
     renderList('food-list', todayEntries, entry => {
       const pumpkinBadge = entry.pumpkin ? `<span class="badge badge-pumpkin">🎃</span>` : '';
       return `<li>
+        <button class="btn-delete-entry" onclick="deleteFood('${entry.time}')" title="Delete">×</button>
         <span class="recent-time">${fmtTime(entry.time)}</span>
         <span style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
           <span class="badge ${MEAL_BADGE_CLASS[entry.meal]}">${MEAL_BADGE_LABELS[entry.meal]}</span>
