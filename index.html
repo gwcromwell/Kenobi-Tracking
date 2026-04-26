@@ -274,8 +274,9 @@
 
     .recent-list li {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
+      gap: 6px;
       padding: 5px 6px;
       border-radius: 6px;
       font-size: 0.85rem;
@@ -286,8 +287,8 @@
     .recent-list li:nth-child(even) { background: rgba(0,0,0,0.025); }
 
     .recent-time { font-family: 'Nunito', sans-serif; font-weight: 700; color: var(--text-dark); }
-    .recent-ago  { color: var(--text-muted); font-size: 0.75rem; background: rgba(0,0,0,0.06); padding: 2px 8px; border-radius: 20px; }
-    .badge-row   { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .recent-ago  { color: var(--text-muted); font-size: 0.75rem; background: rgba(0,0,0,0.06); padding: 2px 8px; border-radius: 20px; margin-left: auto; }
+    .badge-row   { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-left: auto; }
 
     /* ── BADGES ───────────────────────────────────────────────────── */
     .badge {
