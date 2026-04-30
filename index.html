@@ -469,11 +469,140 @@
     .stat-unit   { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
     .hint-text   { font-size: 0.72rem; color: var(--text-muted); }
 
+    /* ── PAGE HEADER ──────────────────────────────────────────────── */
+    .page-header {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      min-height: 44px;
+    }
+
+    .page-header h1 { margin-bottom: 0; }
+
+    .btn-schedule {
+      position: absolute;
+      left: 0;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 800;
+      background: #fff;
+      border: 1.5px solid #d5cfc7;
+      border-radius: 10px;
+      padding: 6px 11px;
+      color: var(--text-mid);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .btn-schedule:hover { border-color: #a8a29e; background: #fdf4e7; color: var(--text-dark); }
+
+    /* ── SCHEDULE MODAL ───────────────────────────────────────────── */
+    .schedule-modal-box {
+      max-width: 400px;
+      text-align: left;
+    }
+
+    .schedule-sections { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+
+    .schedule-section {
+      border-radius: 12px;
+      border-left: 4px solid transparent;
+      padding: 10px 12px;
+    }
+
+    .schedule-section.s-water    { border-left-color: var(--color-water);    background: linear-gradient(135deg, #f0f8ff 0%, #f8fbff 100%); }
+    .schedule-section.s-bathroom { border-left-color: var(--color-bathroom); background: linear-gradient(135deg, #fffbf0 0%, #fffdf8 100%); }
+    .schedule-section.s-food     { border-left-color: var(--color-food);     background: linear-gradient(135deg, #f0fff6 0%, #f8fffc 100%); }
+
+    .schedule-section-title {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-mid);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .schedule-water-note {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-water);
+    }
+
+    .schedule-walk-list { display: flex; flex-direction: column; gap: 5px; }
+
+    .schedule-walk-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .walk-time {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: var(--color-bathroom);
+      min-width: 90px;
+    }
+
+    .walk-label {
+      font-size: 0.85rem;
+      color: var(--text-mid);
+    }
+
+    .schedule-meal-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .schedule-meal-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .meal-time {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: var(--color-food);
+      min-width: 64px;
+      flex-shrink: 0;
+    }
+
+    .meal-desc {
+      font-size: 0.85rem;
+      color: var(--text-mid);
+      line-height: 1.4;
+    }
+
+    .meal-pumpkin {
+      display: inline-block;
+      margin-left: 4px;
+      font-size: 0.78rem;
+      background: #fef3c7;
+      color: #92400e;
+      border-radius: 10px;
+      padding: 1px 7px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+    }
+
   </style>
 </head>
 <body>
 
-<h1>🐾 Kenobi Tracker <span>&#9829;</span></h1>
+<div class="page-header">
+  <button class="btn-schedule" id="btn-schedule">📋 Schedule</button>
+  <h1>🐾 Kenobi Tracker <span>&#9829;</span></h1>
+</div>
 
 <div class="grid">
 
@@ -615,6 +744,71 @@
       <button class="btn btn-poop" id="btn-incident-poop"><span>💩</span><span>Poop</span></button>
     </div>
     <button class="btn-cancel" id="btn-incident-cancel">Cancel</button>
+  </div>
+</div>
+
+<!-- SCHEDULE MODAL -->
+<div class="modal-overlay" id="schedule-modal">
+  <div class="modal-box schedule-modal-box">
+    <div class="modal-title">📋 Kenobi's Daily Schedule</div>
+
+    <div class="schedule-sections">
+
+      <!-- Water -->
+      <div class="schedule-section s-water">
+        <div class="schedule-section-title">💧 Water</div>
+        <div class="schedule-water-note">1 tablespoon per hour</div>
+      </div>
+
+      <!-- Walks -->
+      <div class="schedule-section s-bathroom">
+        <div class="schedule-section-title">🚶 Walks</div>
+        <div class="schedule-walk-list">
+          <div class="schedule-walk-item">
+            <span class="walk-time">6:30–7:30 AM</span>
+            <span class="walk-label">Morning walk</span>
+          </div>
+          <div class="schedule-walk-item">
+            <span class="walk-time">11:00 AM</span>
+            <span class="walk-label">Afternoon walk</span>
+          </div>
+          <div class="schedule-walk-item">
+            <span class="walk-time">2:30 PM</span>
+            <span class="walk-label">Second afternoon walk</span>
+          </div>
+          <div class="schedule-walk-item">
+            <span class="walk-time">7:30 PM</span>
+            <span class="walk-label">First evening walk</span>
+          </div>
+          <div class="schedule-walk-item">
+            <span class="walk-time">10:30 PM</span>
+            <span class="walk-label">Nighttime walk</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feeding -->
+      <div class="schedule-section s-food">
+        <div class="schedule-section-title">🍽️ Feeding</div>
+        <div class="schedule-meal-list">
+          <div class="schedule-meal-item">
+            <span class="meal-time">7:30 AM</span>
+            <span class="meal-desc">⅓ can wet food</span>
+          </div>
+          <div class="schedule-meal-item">
+            <span class="meal-time">2:30 PM</span>
+            <span class="meal-desc">⅓ can wet food</span>
+          </div>
+          <div class="schedule-meal-item">
+            <span class="meal-time">8:30 PM</span>
+            <span class="meal-desc">⅓ can wet food <span class="meal-pumpkin">🎃 + 2 tbsp pumpkin</span></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="btn-cancel" id="btn-schedule-close">Close</button>
   </div>
 </div>
 
@@ -1005,6 +1199,15 @@
   // Close modal on backdrop click
   document.getElementById('incident-modal').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeIncidentModal();
+  });
+
+  // Schedule modal
+  function openScheduleModal()  { document.getElementById('schedule-modal').classList.add('show'); }
+  function closeScheduleModal() { document.getElementById('schedule-modal').classList.remove('show'); }
+  document.getElementById('btn-schedule').addEventListener('click', openScheduleModal);
+  document.getElementById('btn-schedule-close').addEventListener('click', closeScheduleModal);
+  document.getElementById('schedule-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeScheduleModal();
   });
 
   // Event delegation for dynamically-rendered delete buttons
