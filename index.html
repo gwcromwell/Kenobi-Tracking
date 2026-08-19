@@ -290,6 +290,35 @@
     .recent-ago  { color: var(--text-muted); font-size: 0.75rem; background: rgba(0,0,0,0.06); padding: 2px 8px; border-radius: 20px; margin-left: auto; }
     .badge-row   { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-left: auto; }
 
+    .btn-edit-time {
+      background: none;
+      border: none;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 0 2px;
+      flex-shrink: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      line-height: 1;
+    }
+    .card.edit-mode .btn-edit-time { opacity: 1; pointer-events: auto; }
+
+    .time-edit-input {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      border: 2px solid #e8e2d9;
+      border-radius: 10px;
+      padding: 8px 14px;
+      width: 100%;
+      text-align: center;
+      color: var(--text-dark);
+      background: #f8f6f2;
+      margin-bottom: 14px;
+      display: block;
+    }
+
     /* ── BADGES ───────────────────────────────────────────────────── */
     .badge {
       display: inline-block;
@@ -734,6 +763,18 @@
   <button class="btn-share" id="btn-copy-link">🔗 Copy Sharing Link</button>
 </div>
 
+<!-- TIME EDIT MODAL -->
+<div class="modal-overlay" id="time-edit-modal">
+  <div class="modal-box">
+    <div class="modal-title">🕐 Edit Time</div>
+    <input type="time" id="time-edit-input" class="time-edit-input">
+    <div class="modal-btn-row">
+      <button class="btn btn-water" id="time-edit-confirm">Save Time</button>
+    </div>
+    <button class="btn-cancel" id="time-edit-cancel">Cancel</button>
+  </div>
+</div>
+
 <!-- INCIDENT TYPE MODAL -->
 <div class="modal-overlay" id="incident-modal">
   <div class="modal-box">
@@ -995,6 +1036,86 @@
     renderFood();
   }
 
+  // ─── Time edit ───────────────────────────────────────────────────────
+  let timeEditCtx = null; // { section: 'water'|'bathroom'|'food', oldTs: string }
+
+  function openTimeEditModal(section, oldTs) {
+    timeEditCtx = { section, oldTs };
+    const d = new Date(oldTs);
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    document.getElementById('time-edit-input').value = `${hh}:${mm}`;
+    document.getElementById('time-edit-modal').classList.add('show');
+  }
+
+  function closeTimeEditModal() {
+    document.getElementById('time-edit-modal').classList.remove('show');
+    timeEditCtx = null;
+  }
+
+  function makeUpdatedIso(oldIso, newTimeStr) {
+    const d = new Date(oldIso);
+    const [h, m] = newTimeStr.split(':').map(Number);
+    d.setHours(h, m, 0, 0);
+    return d.toISOString();
+  }
+
+  function confirmTimeEdit() {
+    if (!timeEditCtx) return;
+    const newTime = document.getElementById('time-edit-input').value;
+    if (!newTime) return;
+    const { section, oldTs } = timeEditCtx;
+    closeTimeEditModal();
+    if (section === 'water')    updateWaterTime(oldTs, newTime);
+    else if (section === 'bathroom') updateBathroomTime(oldTs, newTime);
+    else if (section === 'food')     updateFoodTime(oldTs, newTime);
+  }
+
+  function updateWaterTime(oldTs, newTimeStr) {
+    const newTs = makeUpdatedIso(oldTs, newTimeStr);
+    waterLog = waterLog.filter(t => t !== oldTs);
+    waterLog.push(newTs);
+    waterLog.sort();
+    save('waterLog', waterLog);
+    setDoc(docRef, { waterLog: arrayRemove(oldTs) }, { merge: true })
+      .then(() => setDoc(docRef, { waterLog: arrayUnion(newTs) }, { merge: true }))
+      .catch(() => toast('⚠️ Update failed, try again'));
+    renderWater();
+    toast('✅ Time updated!', 'water');
+  }
+
+  function updateBathroomTime(oldTs, newTimeStr) {
+    const oldEntry = bathroomLog.find(e => e.time === oldTs);
+    if (!oldEntry) return;
+    const newTs = makeUpdatedIso(oldTs, newTimeStr);
+    const newEntry = { ...oldEntry, time: newTs };
+    bathroomLog = bathroomLog.filter(e => e.time !== oldTs);
+    bathroomLog.push(newEntry);
+    bathroomLog.sort((a, b) => new Date(a.time) - new Date(b.time));
+    save('bathroomLog', bathroomLog);
+    setDoc(docRef, { bathroomLog: arrayRemove(oldEntry) }, { merge: true })
+      .then(() => setDoc(docRef, { bathroomLog: arrayUnion(newEntry) }, { merge: true }))
+      .catch(() => toast('⚠️ Update failed, try again'));
+    renderBathroom();
+    toast('✅ Time updated!', 'bathroom');
+  }
+
+  function updateFoodTime(oldTs, newTimeStr) {
+    const oldEntry = foodLog.find(e => e.time === oldTs);
+    if (!oldEntry) return;
+    const newTs = makeUpdatedIso(oldTs, newTimeStr);
+    const newEntry = { ...oldEntry, time: newTs };
+    foodLog = foodLog.filter(e => e.time !== oldTs);
+    foodLog.push(newEntry);
+    foodLog.sort((a, b) => new Date(a.time) - new Date(b.time));
+    save('foodLog', foodLog);
+    setDoc(docRef, { foodLog: arrayRemove(oldEntry) }, { merge: true })
+      .then(() => setDoc(docRef, { foodLog: arrayUnion(newEntry) }, { merge: true }))
+      .catch(() => toast('⚠️ Update failed, try again'));
+    renderFood();
+    toast('✅ Time updated!', 'food');
+  }
+
   // ─── Water ───────────────────────────────────────────────────────────
   function giveWater() {
     if (!canLog('water')) return;
@@ -1014,6 +1135,7 @@
       `<li>
         <button class="btn-delete-entry" data-ts="${escapeHtml(ts)}" title="Delete">×</button>
         <span class="recent-time">${escapeHtml(fmtTime(ts))}</span>
+        <button class="btn-edit-time" data-ts="${escapeHtml(ts)}" title="Edit time">✏️</button>
         <span class="recent-ago">${escapeHtml(elapsedStr(ts))}</span>
       </li>`,
       'No waterings recorded today'
@@ -1040,6 +1162,7 @@
       return `<li>
         <button class="btn-delete-entry" data-time="${escapeHtml(entry.time)}" title="Delete">×</button>
         <span class="recent-time">${escapeHtml(fmtTime(entry.time))}</span>
+        <button class="btn-edit-time" data-time="${escapeHtml(entry.time)}" title="Edit time">✏️</button>
         <span class="badge-row">
           <span class="badge ${escapeHtml(BATHROOM_BADGE_CLASS[entry.type] || '')}">${escapeHtml(BATHROOM_BADGE_LABELS[entry.type] || '')}</span>
           ${diaperBadge}
@@ -1102,6 +1225,7 @@
       return `<li>
         <button class="btn-delete-entry" data-time="${escapeHtml(entry.time)}" title="Delete">×</button>
         <span class="recent-time">${escapeHtml(fmtTime(entry.time))}</span>
+        <button class="btn-edit-time" data-time="${escapeHtml(entry.time)}" title="Edit time">✏️</button>
         <span class="badge-row">
           <span class="badge ${escapeHtml(MEAL_BADGE_CLASS[entry.meal] || '')}">${escapeHtml(MEAL_BADGE_LABELS[entry.meal] || '')}</span>
           ${pumpkinBadge}
@@ -1210,18 +1334,31 @@
     if (e.target === e.currentTarget) closeScheduleModal();
   });
 
-  // Event delegation for dynamically-rendered delete buttons
+  // Event delegation for dynamically-rendered delete and edit-time buttons
   document.getElementById('water-list').addEventListener('click', e => {
-    const btn = e.target.closest('.btn-delete-entry');
-    if (btn) deleteWater(btn.dataset.ts);
+    const del = e.target.closest('.btn-delete-entry');
+    if (del) { deleteWater(del.dataset.ts); return; }
+    const edt = e.target.closest('.btn-edit-time');
+    if (edt) openTimeEditModal('water', edt.dataset.ts);
   });
   document.getElementById('bathroom-list').addEventListener('click', e => {
-    const btn = e.target.closest('.btn-delete-entry');
-    if (btn) deleteBathroom(btn.dataset.time);
+    const del = e.target.closest('.btn-delete-entry');
+    if (del) { deleteBathroom(del.dataset.time); return; }
+    const edt = e.target.closest('.btn-edit-time');
+    if (edt) openTimeEditModal('bathroom', edt.dataset.time);
   });
   document.getElementById('food-list').addEventListener('click', e => {
-    const btn = e.target.closest('.btn-delete-entry');
-    if (btn) deleteFood(btn.dataset.time);
+    const del = e.target.closest('.btn-delete-entry');
+    if (del) { deleteFood(del.dataset.time); return; }
+    const edt = e.target.closest('.btn-edit-time');
+    if (edt) openTimeEditModal('food', edt.dataset.time);
+  });
+
+  // Time edit modal
+  document.getElementById('time-edit-confirm').addEventListener('click', confirmTimeEdit);
+  document.getElementById('time-edit-cancel').addEventListener('click', closeTimeEditModal);
+  document.getElementById('time-edit-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeTimeEditModal();
   });
 
   // ─── Init ─────────────────────────────────────────────────────────────
