@@ -17,9 +17,19 @@ A real-time dog habit tracker for tracking Kenobi's daily water intake, bathroom
 
 ### Feeding
 - Record breakfast, lunch, and dinner
-- Optional **Add Pumpkin** toggle — enable it before recording a meal to log wet food with pumpkin instead of plain wet food; resets automatically after each record
+- Optional **Add Gabapentin** toggle — enable it before recording a meal to tag the entry with the medication badge; resets automatically after each record
 - Shows today's feedings with meal and food-type badges
 - Only today's records are shown; prior days are never displayed
+
+### Schedule
+- Tap the **📋 Schedule** button in the upper-left of the page header to open the daily schedule modal
+- Displays water, walks, and feeding schedules at a glance
+- Tap the backdrop or the Close button to dismiss
+
+### Editing & Deleting Entries
+- Each card (Water, Bathroom, Feeding) has an **✏️** button in the card title that toggles edit mode
+- In edit mode, a **×** delete button appears next to each entry — tap it to remove the entry from both local state and Firestore
+- In edit mode, a **✏️** pencil button also appears on each entry — tap it to open the **Edit Time** modal and correct a previously recorded timestamp; the list re-sorts automatically to maintain chronological order after saving
 
 ### Accident / Incident
 - Tracks the most recent accident with a large days-since counter
@@ -66,7 +76,7 @@ trackers/{sessionId}
   bathroomLog: { time, type, diaper }[]      // type: "piss" | "poop" | "both"
   incidentTs:  string | null                 // ISO timestamp of last accident (drives UI counter)
   incidentLog: { time, type }[]             // type: "puke" | "pee" | "poop" — full history for export
-  foodLog:     { time, meal, pumpkin }[]     // meal: "breakfast" | "lunch" | "dinner"
+  foodLog:     { time, meal, pumpkin }[]     // meal: "breakfast" | "lunch" | "dinner"; pumpkin: boolean (true = Gabapentin included — field key kept for backward compatibility)
 ```
 
 ## Tech Stack
