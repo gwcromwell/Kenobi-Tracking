@@ -288,7 +288,7 @@
 
     .recent-time { font-family: 'Nunito', sans-serif; font-weight: 700; color: var(--text-dark); }
     .recent-ago  { color: var(--text-muted); font-size: 0.75rem; background: rgba(0,0,0,0.06); padding: 2px 8px; border-radius: 20px; margin-left: auto; }
-    .badge-row   { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+    .badge-row   { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; margin-left: auto; min-width: 0; overflow: hidden; }
 
     .btn-edit-time {
       background: none;
@@ -1135,7 +1135,7 @@
     renderList('water-list', todayEntries, ts =>
       `<li>
         <button class="btn-delete-entry" data-ts="${escapeHtml(ts)}" title="Delete">×</button>
-        <span class="recent-time">${escapeHtml(fmtTime(ts))}</span>
+        <span class="recent-time">${escapeHtml(fmtTimeOnly(ts))}</span>
         <button class="btn-edit-time" data-ts="${escapeHtml(ts)}" title="Edit time">✏️</button>
         <span class="recent-ago">${escapeHtml(elapsedStr(ts))}</span>
       </li>`,
@@ -1162,7 +1162,7 @@
       const diaperBadge = entry.diaper ? `<span class="badge badge-diaper">🨲</span>` : '';
       return `<li>
         <button class="btn-delete-entry" data-time="${escapeHtml(entry.time)}" title="Delete">×</button>
-        <span class="recent-time">${escapeHtml(fmtTime(entry.time))}</span>
+        <span class="recent-time">${escapeHtml(fmtTimeOnly(entry.time))}</span>
         <button class="btn-edit-time" data-time="${escapeHtml(entry.time)}" title="Edit time">✏️</button>
         <span class="badge-row">
           <span class="badge ${escapeHtml(BATHROOM_BADGE_CLASS[entry.type] || '')}">${escapeHtml(BATHROOM_BADGE_LABELS[entry.type] || '')}</span>
@@ -1225,7 +1225,7 @@
       const pumpkinBadge = entry.pumpkin ? `<span class="badge badge-pumpkin">💊 Gabapentin</span>` : '';
       return `<li>
         <button class="btn-delete-entry" data-time="${escapeHtml(entry.time)}" title="Delete">×</button>
-        <span class="recent-time">${escapeHtml(fmtTime(entry.time))}</span>
+        <span class="recent-time">${escapeHtml(fmtTimeOnly(entry.time))}</span>
         <button class="btn-edit-time" data-time="${escapeHtml(entry.time)}" title="Edit time">✏️</button>
         <span class="badge-row">
           <span class="badge ${escapeHtml(MEAL_BADGE_CLASS[entry.meal] || '')}">${escapeHtml(MEAL_BADGE_LABELS[entry.meal] || '')}</span>
