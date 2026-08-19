@@ -8,6 +8,7 @@
 
 import json
 import os
+import subprocess
 from datetime import datetime, timezone
 from urllib.request import urlopen
 from urllib.error import URLError
@@ -28,6 +29,32 @@ def load_session_id():
     except FileNotFoundError:
         pass
     return None
+
+
+def prompt_session_id():
+    """Show a native macOS dialog asking for the session ID."""
+    script = (
+        'display dialog "Enter your Kenobi Tracker session ID'
+        ' (copy it from the ?session= parameter in the app URL):" '
+        'default answer "" '
+        'with title "Kenobi Tracker Setup" '
+        'buttons {"Cancel", "Save"} default button "Save"'
+    )
+    result = subprocess.run(
+        ["osascript", "-e", script],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        return None
+    for part in result.stdout.strip().split(", "):
+        if part.startswith("text returned:"):
+            return part[len("text returned:"):].strip()
+    return None
+
+
+def save_session_id(session_id):
+    with open(CONF_FILE, "w") as f:
+        f.write(f"# Kenobi Tracker session ID\n{session_id}\n")
 
 
 def elapsed(iso_str):
@@ -95,8 +122,12 @@ def print_error(msg):
 def main():
     session_id = load_session_id()
     if not session_id:
-        print_error(f"No session configured — create {CONF_FILE}")
-        return
+        session_id = prompt_session_id()
+        if session_id:
+            save_session_id(session_id)
+        else:
+            print_error("Tap to set up — run the plugin again to enter your session ID")
+            return
 
     try:
         doc = fetch_doc(session_id)

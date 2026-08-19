@@ -29,16 +29,7 @@ service cloud.firestore {
 }
 ```
 
-### 2. Create the config file
-
-Find your session UUID from the `?session=` parameter in the Kenobi Tracker URL, then create `~/.kenobi-tracker.conf`:
-
-```
-# Kenobi Tracker session ID
-YOUR-SESSION-UUID-HERE
-```
-
-### 3. Install the plugin
+### 2. Install the plugin
 
 Copy `kenobi.2m.py` to your xbar plugins folder (default: `~/Library/Application Support/xbar/plugins/`):
 
@@ -47,7 +38,7 @@ cp kenobi.2m.py ~/Library/Application\ Support/xbar/plugins/
 chmod +x ~/Library/Application\ Support/xbar/plugins/kenobi.2m.py
 ```
 
-Then click **Refresh All** in xbar. The widget appears in your menu bar within seconds.
+Then click **Refresh All** in xbar. On first run a macOS dialog will appear asking for your session ID — paste the UUID from the `?session=` parameter in the Kenobi Tracker URL and click **Save**. The widget appears immediately after.
 
 ## Customizing the poll interval
 
