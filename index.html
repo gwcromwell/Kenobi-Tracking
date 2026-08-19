@@ -307,7 +307,7 @@
     .badge-breakfast { background: #ffedd5; color: #9a3412; }
     .badge-lunch     { background: #dcfce7; color: #14532d; }
     .badge-dinner    { background: #ede9fe; color: #4c1d95; }
-    .badge-pumpkin   { background: #fef3c7; color: #92400e; }
+    .badge-pumpkin   { background: #ede9fe; color: #3730a3; }
 
     /* ── INCIDENT ─────────────────────────────────────────────────── */
     .incident-row { display: flex; gap: 10px; align-items: center; }
@@ -587,8 +587,8 @@
       display: inline-block;
       margin-left: 4px;
       font-size: 0.78rem;
-      background: #fef3c7;
-      color: #92400e;
+      background: #ede9fe;
+      color: #3730a3;
       border-radius: 10px;
       padding: 1px 7px;
       font-family: 'Nunito', sans-serif;
@@ -691,8 +691,8 @@
         <div class="diaper-row" id="pumpkin-toggle">
           <div class="diaper-check" id="pumpkin-check"></div>
           <div>
-            <div class="diaper-label">Add Pumpkin</div>
-            <div class="hint-text">Toggle for wet food + pumpkin</div>
+            <div class="diaper-label">Add Gabapentin</div>
+            <div class="hint-text">Toggle to include medication</div>
           </div>
         </div>
       </div>
@@ -801,7 +801,7 @@
           </div>
           <div class="schedule-meal-item">
             <span class="meal-time">8:30 PM</span>
-            <span class="meal-desc">⅓ can wet food <span class="meal-pumpkin">🎃 + 2 tbsp pumpkin</span></span>
+            <span class="meal-desc">⅓ can wet food <span class="meal-pumpkin">💊 + Gabapentin</span></span>
           </div>
         </div>
       </div>
@@ -1098,7 +1098,7 @@
   function renderFood() {
     const todayEntries = filterToday(foodLog, e => e.time).reverse();
     renderList('food-list', todayEntries, entry => {
-      const pumpkinBadge = entry.pumpkin ? `<span class="badge badge-pumpkin">🎃</span>` : '';
+      const pumpkinBadge = entry.pumpkin ? `<span class="badge badge-pumpkin">💊 Gabapentin</span>` : '';
       return `<li>
         <button class="btn-delete-entry" data-time="${escapeHtml(entry.time)}" title="Delete">×</button>
         <span class="recent-time">${escapeHtml(fmtTime(entry.time))}</span>
@@ -1122,7 +1122,7 @@
       entries.push({ iso: e.time, row: [fmtDate(e.time), fmtTimeOnly(e.time), 'Bathroom', BATHROOM_EXPORT_LABELS[e.type] || e.type, e.diaper ? 'Diaper' : ''] })
     );
     foodLog.filter(e => inRange(e.time)).forEach(e =>
-      entries.push({ iso: e.time, row: [fmtDate(e.time), fmtTimeOnly(e.time), 'Feeding', MEAL_BADGE_LABELS[e.meal] || e.meal, e.pumpkin ? 'Pumpkin' : ''] })
+      entries.push({ iso: e.time, row: [fmtDate(e.time), fmtTimeOnly(e.time), 'Feeding', MEAL_BADGE_LABELS[e.meal] || e.meal, e.pumpkin ? 'Gabapentin' : ''] })
     );
     incidentLog.filter(e => inRange(e.time)).forEach(e =>
       entries.push({ iso: e.time, row: [fmtDate(e.time), fmtTimeOnly(e.time), 'Incident', INCIDENT_TYPE_LABELS[e.type] || e.type || '', ''] })
