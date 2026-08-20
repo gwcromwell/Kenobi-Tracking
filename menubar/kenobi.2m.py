@@ -73,14 +73,6 @@ def elapsed(iso_str):
         return "?"
 
 
-def fmt_local_time(iso_str):
-    try:
-        ts = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
-        return ts.astimezone().strftime("%-I:%M %p")
-    except Exception:
-        return "?"
-
-
 def fetch_doc(session_id):
     url = (
         f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}"
@@ -141,42 +133,16 @@ def main():
     fields = doc.get("fields", {})
 
     water_log = get_strings(fields, "waterLog")
-    if water_log:
-        last_water_ts = max(water_log)
-        water_elapsed = elapsed(last_water_ts)
-        water_time = fmt_local_time(last_water_ts)
-    else:
-        last_water_ts = None
-        water_elapsed = "–"
-        water_time = None
+    water_elapsed = elapsed(max(water_log)) if water_log else "–"
 
     bathroom_log = get_maps(fields, "bathroomLog")
     if bathroom_log:
-        last_outing = max(bathroom_log, key=lambda e: map_str(e, "time"))
-        last_outing_ts = map_str(last_outing, "time")
+        last_outing_ts = map_str(max(bathroom_log, key=lambda e: map_str(e, "time")), "time")
         outing_elapsed = elapsed(last_outing_ts)
-        outing_time = fmt_local_time(last_outing_ts)
-        type_labels = {"piss": "pee", "poop": "poop", "both": "both"}
-        outing_type = type_labels.get(map_str(last_outing, "type"), "")
     else:
-        last_outing_ts = None
         outing_elapsed = "–"
-        outing_time = None
-        outing_type = None
 
     print(f"💧 {water_elapsed}  🐾 {outing_elapsed}")
-    print("---")
-
-    if water_time:
-        print(f"Last watering: {water_time} ({water_elapsed} ago)")
-    else:
-        print("Last watering: none recorded")
-
-    if outing_time:
-        type_suffix = f" · {outing_type}" if outing_type else ""
-        print(f"Last outing: {outing_time} ({outing_elapsed} ago){type_suffix}")
-    else:
-        print("Last outing: none recorded")
 
 
 if __name__ == "__main__":
